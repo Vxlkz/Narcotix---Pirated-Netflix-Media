@@ -1,3 +1,9 @@
-"scripts": {
-  "build": "build"
+{
+  "name": "narcotix-pirated-netflix-media",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo 'No build step defined'"
+  },
+  "dependencies": {},
+  "devDependencies": {}
 }
