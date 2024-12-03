@@ -1,97 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Narcotix</title>
-
-  <!-- Link to the favicon -->
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
-
-  <!-- Other meta tags and styles -->
-  <link href="https://fonts.googleapis.com/css2?family=Netflix+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Narcotix | Pirated Netflix</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   <style>
-    /* Global styles for body and fonts */
     body {
-      font-family: 'Netflix Sans', sans-serif;
       margin: 0;
-      padding: 0;
-      background: #141414;
+      font-family: 'Roboto', sans-serif;
+      background-color: #141414;
       color: #fff;
+      padding-top: 60px;
+      padding-bottom: 100px;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
       display: flex;
-      justify-content: center;
       align-items: center;
-      height: 100vh;
+      padding: 10px 20px;
+      background-color: #141414;
+      z-index: 1000;
+      transition: background-color 0.3s ease;
+      border-bottom: 1px solid #ccc;
     }
 
-    .login-container {
-      background-color: rgba(0, 0, 0, 0.8);
-      padding: 40px;
-      border-radius: 6px;
-      width: 400px;
-      text-align: center;
+    .navbar img {
+      height: 40px;
     }
 
-    .login-container h1 {
-      font-size: 40px;
-      font-weight: 600;
-      color: #e50914;
-      margin-bottom: 20px;
+    .navbar .right-icons {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
     }
 
-    .login-container input[type="text"],
-    .login-container input[type="password"] {
-      width: 100%;
-      padding: 15px;
-      margin: 10px 0;
-      border-radius: 4px;
-      border: 1px solid #333;
-      background-color: #333;
-      color: #fff;
-      font-size: 16px;
-    }
-
-    .login-container input[type="submit"] {
-      width: 100%;
-      padding: 15px;
-      background-color: #e50914;
-      border: none;
-      border-radius: 4px;
-      color: #fff;
-      font-size: 18px;
+    .navbar .right-icons i {
+      margin: 0 10px;
       cursor: pointer;
-      transition: background-color 0.3s;
     }
 
-    .login-container input[type="submit"]:hover {
-      background-color: #b20710;
+    /* Section Titles */
+    .section-title {
+      margin: 20px 20px 10px;
+      font-size: 24px;
+      font-weight: 700;
     }
 
-    .login-container .footer {
-      margin-top: 20px;
-      font-size: 14px;
-      color: #aaa;
+    /* Movie Rows */
+    .row {
+      display: flex;
+      overflow-x: auto;
+      padding: 0 20px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      transition: all 0.3s ease-in-out;
     }
 
-    .login-container .footer a {
-      color: #e50914;
-      text-decoration: none;
+    .row img {
+      margin-right: 10px;
+      height: 150px;
+      width: 250px;
+      object-fit: cover;
+      cursor: pointer;
+      scroll-snap-align: start;
+      border-radius: 12px;
+      opacity: 0.7;
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
-    .login-container .footer a:hover {
-      text-decoration: underline;
+    .row img:hover {
+      transform: scale(1.05);
+      opacity: 1;
     }
 
-    /* Netflix background */
-    .background-image {
-      position: absolute;
+    .row img:last-child {
+      margin-right: 0;
+    }
+
+    .row img.in-view {
+      opacity: 1;
+    }
+
+    /* Search Box */
+    #searchBox {
+      position: fixed;
+      top: 55px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      align-items: center;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 5px;
+      z-index: 999;
+      width: 80%;
+      transition: all 0.3s ease;
+    }
+
+    #searchInput {
+      width: 80%;
+      padding: 5px;
+      border: none;
+      outline: none;
+      background: #333;
+      color: white;
+    }
+
+    #searchResults {
+      background-color: #333;
+      margin-top: 10px;
+      padding: 10px;
+      display: none;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    #searchResults div {
+      cursor: pointer;
+      padding: 5px;
+      border-bottom: 1px solid #444;
+      display: flex;
+      align-items: center;
+    }
+
+    #searchResults div:hover {
+      background-color: #555;
+    }
+
+    #searchResults img {
+      width: 50px;
+      height: 75px;
+      margin-right: 10px;
+    }
+
+    /* Movie Embed Modal */
+    #movieEmbed {
+      display: none;
+      position: fixed;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background-image: url('https://assets.nflxext.com/ffe/siteui/vlv3/signin-background.jpg');
-      background-size: cover;
-      background-position: center;
-      filter: blur(8px);
-      z-index: -1;
+      background: rgba(0, 0, 0, 0.9);
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+
+    #movieEmbed iframe {
+      width: 90%;
+      height: 80%;
+      border: none;
+      border-radius: 5px;
+    }
+
+    #closeBtn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      font-size: 30px;
+      cursor: pointer;
+      z-index: 1100;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #e50914;
+      border-radius: 50%;
+      border: none;
+    }
+
+    #closeBtn:hover {
+      background-color: #b20710;
+    }
+
+    /* Login Modal */
+    #loginModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1002;
+    }
+
+    .login-container {
+      background: #333;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+      background-color: #444;
+      color: white;
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 10px;
+      background-color: #e50914;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .login-container button:hover {
+      background-color: #b20710;
+    }
+
+    .login-container .close-login {
+      color: white;
+      font-size: 20px;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+    }
+
+    /* Recently Watched */
+    #recentlyWatched {
+      display: flex;
+      flex-direction: column;
+      margin-top: 20px;
+      padding: 10px 20px;
+    }
+
+    .recent-title {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .recent-movie {
+      display: inline-block;
+      margin-right: 10px;
+      position: relative;
+    }
+
+    .recent-movie img {
+      width: 150px;
+      height: 250px;
+      border-radius: 12px;
+    }
+
+    .recent-movie .remove-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      cursor: pointer;
     }
   </style>
 </head>
+
+<body>
+  <!-- Navbar Section -->
+  <div class="navbar" id="navbar">
+    <img alt="Logo" src="https://i.ibb.co/gjBrfcB/c3f62d75a54648c3fcec0d618c004e66.png" width="120" />
+    <div class="right-icons">
+      <i class="fas fa-search" onclick="toggleSearchBox()"></i>
+      <i class="fas fa-tv screen-share-icon" onclick="startScreenSharing()" title="Cast This Page"></i>
+      <i class="fas fa-bell"></i>
+      <i class="fas fa-user" onclick="openLoginModal()"></i>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div id="loginModal">
+    <div class="login-container">
+      <span class="close-login" onclick="closeLoginModal()">×</span>
+      <h2>Login</h2>
+      <input type="email" id="email" placeholder="Email" />
+      <input type="password" id="password" placeholder="Password" />
+      <button onclick="login()">Login</button>
+      <p>Don't have an account? <a href="#">Sign up</a></p>
+    </div>
+  </div>
+
+  <!-- Search Box -->
+  <div id="searchBox">
+    <input type="text" id="searchInput" placeholder="Search for movies..." oninput="searchMovies()" />
+    <div id="searchResults"></div>
+  </div>
+
+  <!-- Recently Watched Genre -->
+  <div id="recentlyWatched" style="display: none;">
+    <div class="recent-title">Recently Watched</div>
+    <div class="row" id="recentMoviesRow"></div>
+  </div>
+
+  <!-- Movie Categories Sections -->
+  <div class="section-title">Action Movies</div>
+  <div class="row" id="movieRowAction"></div>
+  <div class="section-title">Adventure Movies</div>
+  <div class="row" id="movieRowAdventure"></div>
+  <div class="section-title">Animation Movies</div>
+  <div class="row" id="movieRowAnimation"></div>
+  <div class="section-title">Comedy</div>
+  <div class="row" id="movieRowComedy"></div>
+  <div class="section-title">Crime</div>
+  <div class="row" id="movieRowCrime"></div>
+  <div class="section-title">Documentary</div>
+  <div class="row" id="movieRowDocumentary"></div>
+  <div class="section-title">Drama</div>
+  <div class="row" id="movieRowDrama"></div>
+  <div class="section-title">Family</div>
+  <div class="row" id="movieRowFamily"></div>
+  <div class="section-title">Fantasy</div>
+  <div class="row" id="movieRowFantasy"></div>
+  <div class="section-title">Horror</div>
+  <div class="row" id="movieRowHorror"></div>
+  <div class="section-title">Music Movies</div>
+  <div class="row" id="movieRowMusic"></div>
+  <div class="section-title">Mystery</div>
+  <div class="row" id="movieRowMystery"></div>
+  <div class="section-title">Romance</div>
+  <div class="row" id="movieRowRomance"></div>
+  <div class="section-title">Thriller</div>
+  <div class="row" id="movieRowThriller"></div>
+  <div class="section-title">War</div>
+  <div class="row" id="movieRowWar"></div>
+  <div class="section-title">Western</div>
+  <div class="row" id="movieRowWestern"></div>
+
+  <!-- Scroll Extender -->
+  <div id="scrollEnd"></div>
+
+  <!-- Movie Embed Modal -->
+  <div id="movieEmbed">
+    <iframe id="movieIframe" src="" frameborder="0" allowfullscreen></iframe>
+    <button id="closeBtn" onclick="closeEmbed()">×</button>
+  </div>
+
+  <script>
+    let isLoggedIn = false; // Mock login state
+    let recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [];
+
+    // Fetch movies by genre
+    function fetchMoviesByGenre(genreId, rowId) {
+      fetch(`https://api.themoviedb.org/3/discover/movie?api_key=d4d5dc37aeb71914016166a958fbe3db&with_genres=${genreId}&language=en-US&page=1`)
+        .then(response => response.json())
+        .then(data => {
+          const movies = data.results;
+          const row = document.getElementById(rowId);
+          row.innerHTML = '';
+          movies.forEach(movie => {
+            const movieElement = document.createElement('img');
+            movieElement.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
+            movieElement.alt = movie.title;
+            movieElement.onclick = () => onMovieClick(movie);
+            row.appendChild(movieElement);
+          });
+        })
+        .catch(error => console.error('Error fetching movies:', error));
+    }
+
+    // Handle movie click (add to recently watched)
+    function onMovieClick(movie) {
+      if (!isLoggedIn) {
+        alert("Please login to use this feature.");
+        return;
+      }
+
+      // Add to recently watched
+      if (!recentlyWatched.find(m => m.id === movie.id)) {
+        recentlyWatched.push(movie);
+        localStorage.setItem('recentlyWatched', JSON.stringify(recentlyWatched));
+        updateRecentlyWatched();
+      }
+    }
+
+    // Update recently watched UI
+    function updateRecentlyWatched() {
+      const recentlyWatchedContainer = document.getElementById('recentMoviesRow');
+      recentlyWatchedContainer.innerHTML = '';
+
+      recentlyWatched.forEach(movie => {
+        const movieElement = document.createElement('div');
+        movieElement.classList.add('recent-movie');
+        movieElement.innerHTML = `
+          <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" />
+          <button class="remove-btn" onclick="removeFromRecentlyWatched(${movie.id})">×</button>
+        `;
+        recentlyWatchedContainer.appendChild(movieElement);
+      });
+
+      document.getElementById('recentlyWatched').style.display = recentlyWatched.length > 0 ? 'block' : 'none';
+    }
+
+    // Remove movie from recently watched
+    function removeFromRecentlyWatched(movieId) {
+      recentlyWatched = recentlyWatched.filter(movie => movie.id !== movieId);
+      localStorage.setItem('recentlyWatched', JSON.stringify(recentlyWatched));
+      updateRecentlyWatched();
+    }
+
+    // Open Login Modal
+    function openLoginModal() {
+      document.getElementById('loginModal').style.display = 'flex';
+    }
+
+    // Close Login Modal
+    function closeLoginModal() {
+      document.getElementById('loginModal').style.display = 'none';
+    }
+
+    // Login function
+    function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      if (email && password) {
+        isLoggedIn = true; // Simulate successful login
+        alert(`Logged in as ${email}`);
+        closeLoginModal();
+        updateRecentlyWatched(); // Update UI when logged in
+      } else {
+        alert("Please enter both email and password.");
+      }
+    }
+
+    window.onload = function () {
+      if (isLoggedIn) {
+        updateRecentlyWatched();
+      }
+
+      // Fetch movies by genre on page load
+      const genres = [
+        { id: 28, name: "Action" },
+        { id: 12, name: "Adventure" },
+        { id: 16, name: "Animation" },
+        { id: 35, name: "Comedy" },
+        { id: 80, name: "Crime" },
+        { id: 99, name: "Documentary" },
+        { id: 18, name: "Drama" },
+        { id: 10751, name: "Family" },
+        { id: 14, name: "Fantasy" },
+        { id: 27, name: "Horror" },
+        { id: 10402, name: "Music" },
+        { id: 9648, name: "Mystery" },
+        { id: 10749, name: "Romance" },
+        { id: 53, name: "Thriller" },
+        { id: 10752, name: "War" },
+        { id: 37, name: "Western" }
+      ];
+
+      genres.forEach(genre => {
+        fetchMoviesByGenre(genre.id, `movieRow${genre.name}`);
+      });
+    };
+  </script>
+</body>
+
+</html>
