@@ -2,19 +2,22 @@
 <html lang="en">
 
 <head>
-  
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>Narcotix - Pirated Media</title>
-  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <title>Narcotix - Pirated Netflix</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  
+  <!-- Correct Favicon -->
+  <link rel="icon" href="https://raw.githubusercontent.com/github/explore/master/topics/netflix/netflix.png" type="image/png" />
+
   <style>
     body {
       margin: 0;
       font-family: 'Roboto', sans-serif;
       background-color: #141414;
       color: #fff;
+      padding-top: 80px; /* Offset to avoid navbar overlaying content */
     }
 
     /* Navbar */
@@ -62,39 +65,6 @@
       cursor: pointer;
     }
 
-    .navbar.transparent {
-      background-color: transparent;
-    }
-
-    /* Section Titles */
-    .section-title {
-      margin: 20px 20px 10px;
-      font-size: 24px;
-      font-weight: 700;
-    }
-
-    /* Movie Rows */
-    .row {
-      display: flex;
-      overflow-x: auto;
-      padding: 0 20px;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .row img {
-      margin-right: 10px;
-      height: 150px;
-      width: 900px;
-      object-fit: cover;
-      cursor: pointer;
-      scroll-snap-align: start;
-    }
-
-    .row img:last-child {
-      margin-right: 0;
-    }
-
     /* Search Box */
     #searchBox {
       position: fixed;
@@ -140,13 +110,50 @@
       cursor: pointer;
       padding: 5px;
       border-bottom: 1px solid #444;
+      display: flex;
+      align-items: center;
     }
 
     #searchResults div:hover {
       background-color: #555;
     }
 
-    /* My List and Movie Embed Modal */
+    #searchResults img {
+      width: 50px;
+      height: 75px;
+      margin-right: 10px;
+    }
+
+    /* Movie Rows */
+    .row {
+      display: flex;
+      overflow-x: auto;
+      padding: 0 20px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      transition: transform 0.3s ease;
+    }
+
+    .row img {
+      margin-right: 10px;
+      height: 150px;
+      width: 250px;
+      object-fit: cover;
+      cursor: pointer;
+      scroll-snap-align: start;
+      transition: transform 0.3s ease;
+      border-radius: 10px; /* Slightly rounded corners for the images */
+    }
+
+    .row img:last-child {
+      margin-right: 0;
+    }
+
+    .row:hover img {
+      transform: scale(1.1);
+    }
+
+    /* Movie Embed Modal */
     #movieEmbed {
       display: none;
       position: fixed;
@@ -189,6 +196,49 @@
       background-color: #b20710;
     }
 
+    /* Mobile Responsiveness */
+    @media screen and (max-width: 768px) {
+      .navbar {
+        display: none;
+      }
+
+      #searchBox {
+        top: 20px;
+        width: 90%;
+      }
+
+      #searchBox input {
+        width: 70%;
+      }
+
+      #searchBox button {
+        padding: 5px 15px;
+      }
+
+      .section-title {
+        display: none;
+      }
+
+      .row {
+        display: none;
+      }
+
+      .navbar img {
+        margin: 0 auto;
+        display: block;
+      }
+
+      /* Centering Netflix logo on mobile */
+      .logo-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 50px;
+      }
+
+      #searchBox {
+        margin-top: 15px;
+      }
+    }
   </style>
 </head>
 
@@ -214,6 +264,11 @@
     <input type="text" id="searchInput" placeholder="Search for movies..." oninput="searchMovies()" />
     <button id="searchButton" onclick="searchMovies()">Search</button>
     <div id="searchResults"></div>
+  </div>
+
+  <!-- Logo Container for Mobile -->
+  <div class="logo-container">
+    <img alt="Netflix Logo" src="https://i.ibb.co/gjBrfcB/c3f62d75a54648c3fcec0d618c004e66.png" width="120" />
   </div>
 
   <!-- Movie Categories Sections -->
@@ -271,9 +326,9 @@
   <div class="section-title">Western Movies</div>
   <div class="row" id="movieRowWestern"></div>
 
-  <!-- Movie Description and Embed Modal -->
+  <!-- Movie Embed Modal -->
   <div id="movieEmbed">
-    <iframe id="movieIframe" src="" frameborder="0" allowfullscreen></iframe>
+    <iframe id="movieEmbedFrame" src="" allowfullscreen></iframe>
     <button id="closeBtn" onclick="closeEmbed()">×</button>
   </div>
 
@@ -282,7 +337,7 @@
 
     // Fetch movies by genre
     function fetchMoviesByGenre(genreId, rowId) {
-      fetch(https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}&language=en-US&page=1)
+      fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}&language=en-US&page=1`)
         .then(response => response.json())
         .then(data => {
           const movies = data.results;
@@ -290,7 +345,7 @@
           row.innerHTML = ''; // Clear any existing movies
           movies.forEach(movie => {
             const movieElement = document.createElement('img');
-            movieElement.src = https://image.tmdb.org/t/p/w500${movie.poster_path};
+            movieElement.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
             movieElement.alt = movie.title;
             movieElement.onclick = () => showMovieEmbed(movie.id);
             row.appendChild(movieElement);
@@ -301,7 +356,6 @@
 
     // Fetch movies for each genre on page load
     window.onload = function () {
-      // Genres and their corresponding TMDb genre IDs
       const genres = [
         { id: 28, name: "Action" },
         { id: 12, name: "Adventure" },
@@ -317,28 +371,28 @@
         { id: 10402, name: "Music" },
         { id: 9648, name: "Mystery" },
         { id: 10749, name: "Romance" },
+        { id: 878, name: "Science Fiction" },
         { id: 10770, name: "TV Movie" },
         { id: 53, name: "Thriller" },
         { id: 10752, name: "War" },
         { id: 37, name: "Western" }
       ];
 
-      // Fetch movies for each genre
       genres.forEach(genre => {
-        fetchMoviesByGenre(genre.id, movieRow${genre.name});
+        fetchMoviesByGenre(genre.id, `movieRow${genre.name}`);
       });
     };
 
     // Movie Embed Functions
     function showMovieEmbed(movieId) {
-      const iframe = document.getElementById('movieIframe');
-      iframe.src = https://player.smashy.stream/movie/${movieId};
+      const iframe = document.getElementById('movieEmbedFrame');
+      iframe.src = `https://player.smashy.stream/movie/${movieId}`;
       document.getElementById('movieEmbed').style.display = 'flex';
     }
 
     function closeEmbed() {
       document.getElementById('movieEmbed').style.display = 'none';
-      document.getElementById('movieIframe').src = '';
+      document.getElementById('movieEmbedFrame').src = '';
     }
 
     // Search functionality
@@ -350,7 +404,7 @@
         if (query === '') {
           document.getElementById('searchResults').style.display = 'none';
         } else {
-          fetch(https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${query}&language=en-US&page=1)
+          fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${query}&language=en-US&page=1`)
             .then(response => response.json())
             .then(data => {
               const results = data.results;
@@ -358,7 +412,7 @@
               searchResults.innerHTML = '';
               results.forEach(movie => {
                 const movieElement = document.createElement('div');
-                movieElement.innerText = movie.title;
+                movieElement.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}"><span>${movie.title}</span>`;
                 movieElement.onclick = () => showMovieEmbed(movie.id);
                 searchResults.appendChild(movieElement);
               });
@@ -374,16 +428,6 @@
       const searchBox = document.getElementById('searchBox');
       searchBox.style.display = searchBox.style.display === 'flex' ? 'none' : 'flex';
     }
-
-    // Fix navbar transparency on scroll
-    window.addEventListener('scroll', function () {
-      const navbar = document.getElementById('navbar');
-      if (window.scrollY > 100) {
-        navbar.classList.add('transparent');
-      } else {
-        navbar.classList.remove('transparent');
-      }
-    });
   </script>
 </body>
 
