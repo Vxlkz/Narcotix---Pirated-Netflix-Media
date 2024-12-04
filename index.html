@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
@@ -9,12 +8,112 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
   <style>
-    /* Your existing styles remain unchanged */
+    /* Your existing styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #141414;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      background-color: #141414;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+    }
+
+    .navbar img {
+      height: 40px;
+    }
+
+    .right-icons i {
+      margin-left: 20px;
+      cursor: pointer;
+    }
+
+    .search-box {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      padding: 10px;
+      display: none;
+    }
+
+    .search-box input {
+      padding: 10px;
+      background-color: #444;
+      border: 1px solid #555;
+      color: white;
+      width: 300px;
+    }
+
+    .movie-row {
+      display: flex;
+      padding: 20px;
+      overflow-x: scroll;
+      margin-top: 100px;
+    }
+
+    .movie-row img {
+      height: 200px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    #scrollEnd {
+      height: 200px;
+    }
+
+    #movieEmbed {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1001;
+      width: 80%;
+      height: 80%;
+      background-color: black;
+    }
+
+    #movieIframe {
+      width: 100%;
+      height: 100%;
+    }
+
+    #closeBtn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: #f00;
+      color: white;
+      border: none;
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+    .screen-share-icon {
+      font-size: 28px;
+      cursor: pointer;
+    }
   </style>
 </head>
-
 <body>
-  <!-- Navbar Section -->
+
   <div class="navbar" id="navbar">
     <img alt="Logo" src="https://i.ibb.co/gjBrfcB/c3f62d75a54648c3fcec0d618c004e66.png" width="120" />
     <div class="right-icons">
@@ -25,13 +124,29 @@
     </div>
   </div>
 
-  <!-- Movie Categories Sections -->
-  <!-- Your movie categories and rows remain unchanged -->
+  <div class="search-box" id="searchBox">
+    <input type="text" placeholder="Search..." />
+  </div>
 
-  <!-- Scroll Extender -->
+  <div class="movie-row" id="movieRowAction"></div>
+  <div class="movie-row" id="movieRowAdventure"></div>
+  <div class="movie-row" id="movieRowAnimation"></div>
+  <div class="movie-row" id="movieRowComedy"></div>
+  <div class="movie-row" id="movieRowCrime"></div>
+  <div class="movie-row" id="movieRowDocumentary"></div>
+  <div class="movie-row" id="movieRowDrama"></div>
+  <div class="movie-row" id="movieRowFamily"></div>
+  <div class="movie-row" id="movieRowFantasy"></div>
+  <div class="movie-row" id="movieRowHorror"></div>
+  <div class="movie-row" id="movieRowMusic"></div>
+  <div class="movie-row" id="movieRowMystery"></div>
+  <div class="movie-row" id="movieRowRomance"></div>
+  <div class="movie-row" id="movieRowThriller"></div>
+  <div class="movie-row" id="movieRowWar"></div>
+  <div class="movie-row" id="movieRowWestern"></div>
+
   <div id="scrollEnd"></div>
 
-  <!-- Movie Embed Modal -->
   <div id="movieEmbed">
     <iframe id="movieIframe" src="" frameborder="0" allowfullscreen></iframe>
     <button id="closeBtn" onclick="closeEmbed()">×</button>
@@ -40,7 +155,6 @@
   <script>
     const apiKey = 'd4d5dc37aeb71914016166a958fbe3db';
 
-    // Fetch movies by genre
     function fetchMoviesByGenre(genreId, rowId) {
       fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}&language=en-US&page=1`)
         .then(response => response.json())
@@ -56,6 +170,25 @@
             row.appendChild(movieElement);
           });
         });
+    }
+
+    function openMovieEmbed(movieId) {
+      // Here you would link to a streaming service for the movie
+      const streamingURL = `https://www.some-streaming-site.com/movie/${movieId}`; // Replace with your streaming URL or service
+      const iframe = document.getElementById("movieIframe");
+      iframe.src = streamingURL;
+      document.getElementById("movieEmbed").style.display = "block";
+    }
+
+    function closeEmbed() {
+      document.getElementById("movieEmbed").style.display = "none";
+      const iframe = document.getElementById("movieIframe");
+      iframe.src = "";
+    }
+
+    function toggleSearchBox() {
+      const searchBox = document.getElementById("searchBox");
+      searchBox.style.display = searchBox.style.display === "block" ? "none" : "block";
     }
 
     // Screen sharing logic
@@ -93,7 +226,7 @@
     function castScreenToDevice(stream) {
       const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
       if (castSession) {
-        const mediaInfo = new chrome.cast.media.MediaInfo('screen', 'video/mp4'); // You can adjust the MIME type if needed
+        const mediaInfo = new chrome.cast.media.MediaInfo('screen', 'video/mp4');
         mediaInfo.stream = stream;
         const request = new chrome.cast.media.LoadRequest(mediaInfo);
         castSession.loadMedia(request, function () {
@@ -106,7 +239,7 @@
       }
     }
 
-    // Fetch movies for each genre (this part remains unchanged)
+    // Fetch movies for each genre
     fetchMoviesByGenre(28, 'movieRowAction');
     fetchMoviesByGenre(12, 'movieRowAdventure');
     fetchMoviesByGenre(16, 'movieRowAnimation');
@@ -119,11 +252,6 @@
     fetchMoviesByGenre(27, 'movieRowHorror');
     fetchMoviesByGenre(10402, 'movieRowMusic');
     fetchMoviesByGenre(9648, 'movieRowMystery');
-    fetchMoviesByGenre(10749, 'movieRowRomance');
-    fetchMoviesByGenre(53, 'movieRowThriller');
-    fetchMoviesByGenre(10752, 'movieRowWar');
-    fetchMoviesByGenre(37, 'movieRowWestern');
   </script>
 </body>
-
 </html>
