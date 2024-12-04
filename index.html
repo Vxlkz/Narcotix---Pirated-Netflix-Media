@@ -205,7 +205,36 @@
   <div id="genres">
     <div class="section-title">Action Movies</div>
     <div class="row" id="movieRowAction"></div>
-    <!-- Add more movie categories here as needed -->
+    <div class="section-title">Adventure Movies</div>
+    <div class="row" id="movieRowAdventure"></div>
+    <div class="section-title">Animation Movies</div>
+    <div class="row" id="movieRowAnimation"></div>
+    <div class="section-title">Comedy</div>
+    <div class="row" id="movieRowComedy"></div>
+    <div class="section-title">Crime</div>
+    <div class="row" id="movieRowCrime"></div>
+    <div class="section-title">Documentary</div>
+    <div class="row" id="movieRowDocumentary"></div>
+    <div class="section-title">Drama</div>
+    <div class="row" id="movieRowDrama"></div>
+    <div class="section-title">Family</div>
+    <div class="row" id="movieRowFamily"></div>
+    <div class="section-title">Fantasy</div>
+    <div class="row" id="movieRowFantasy"></div>
+    <div class="section-title">Horror</div>
+    <div class="row" id="movieRowHorror"></div>
+    <div class="section-title">Music Movies</div>
+    <div class="row" id="movieRowMusic"></div>
+    <div class="section-title">Mystery</div>
+    <div class="row" id="movieRowMystery"></div>
+    <div class="section-title">Romance</div>
+    <div class="row" id="movieRowRomance"></div>
+    <div class="section-title">Thriller</div>
+    <div class="row" id="movieRowThriller"></div>
+    <div class="section-title">War</div>
+    <div class="row" id="movieRowWar"></div>
+    <div class="section-title">Western</div>
+    <div class="row" id="movieRowWestern"></div>
   </div>
 
   <!-- Movie Embed Modal -->
@@ -229,36 +258,57 @@
             const movieElement = document.createElement('img');
             movieElement.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
             movieElement.alt = movie.title;
-            movieElement.onclick = () => openMovieEmbed(movie.id); // When clicked, open the movie
+            movieElement.onclick = () => openMovieEmbed(movie.id);
             row.appendChild(movieElement);
           });
         });
     }
 
-    // Fetch movies for specific genres
-    fetchMoviesByGenre(28, 'movieRowAction'); // Action genre
-    // Add more genres here as needed
+    // Fetch movies for each genre
+    fetchMoviesByGenre(28, 'movieRowAction');
+    fetchMoviesByGenre(12, 'movieRowAdventure');
+    fetchMoviesByGenre(16, 'movieRowAnimation');
+    fetchMoviesByGenre(35, 'movieRowComedy');
+    fetchMoviesByGenre(80, 'movieRowCrime');
+    fetchMoviesByGenre(99, 'movieRowDocumentary');
+    fetchMoviesByGenre(18, 'movieRowDrama');
+    fetchMoviesByGenre(10751, 'movieRowFamily');
+    fetchMoviesByGenre(14, 'movieRowFantasy');
+    fetchMoviesByGenre(27, 'movieRowHorror');
+    fetchMoviesByGenre(10402, 'movieRowMusic');
+    fetchMoviesByGenre(9648, 'movieRowMystery');
+    fetchMoviesByGenre(10749, 'movieRowRomance');
+    fetchMoviesByGenre(53, 'movieRowThriller');
+    fetchMoviesByGenre(10752, 'movieRowWar');
+    fetchMoviesByGenre(37, 'movieRowWestern');
 
-    // Function to open the movie embed modal
+    // Open movie embed modal
     function openMovieEmbed(movieId) {
-      const iframe = document.getElementById('movieIframe');
-      iframe.src = `https://www.youtube.com/embed/${movieId}?autoplay=1`; // Using YouTube embed for simplicity
-      document.getElementById('movieEmbed').style.display = 'flex';
+      fetch(`https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${apiKey}&language=en-US`)
+        .then(response => response.json())
+        .then(data => {
+          const video = data.results[0];  // Taking the first video
+          if (video) {
+            const iframeSrc = `https://player.smashy.stream/movie/${video.key}`;
+            document.getElementById('movieIframe').src = iframeSrc;
+            document.getElementById('movieEmbed').style.display = 'flex';
+          }
+        });
     }
 
-    // Function to close the movie embed modal
+    // Close movie embed modal
     function closeEmbed() {
       document.getElementById('movieEmbed').style.display = 'none';
       document.getElementById('movieIframe').src = '';
     }
 
-    // Function to toggle search box visibility
+    // Search box toggle
     function toggleSearchBox() {
       const searchBox = document.getElementById('searchBox');
-      searchBox.style.display = searchBox.style.display === 'flex' ? 'none' : 'flex';
+      searchBox.style.display = searchBox.style.display === 'none' ? 'flex' : 'none';
     }
 
-    // Function to search for movies
+    // Search for movies
     function searchMovies() {
       const query = document.getElementById('searchInput').value;
       if (query.length < 3) {
