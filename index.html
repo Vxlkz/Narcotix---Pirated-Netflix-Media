@@ -1,314 +1,299 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Narcotix | Pirated Netflix</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-    <style>
-        /* Body and main styling */
-        body {
-            margin: 0;
-            font-family: 'Roboto', sans-serif;
-            background-color: #141414;
-            color: #fff;
-            padding-top: 60px;
-            padding-bottom: 100px;
-            overflow: hidden; /* Hide the main scrollbar */
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Narcotix | Pirated Netflix</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #141414;
+      color: #fff;
+      overflow-x: hidden;
+      padding-top: 60px;
+    }
 
-        html {
-            scroll-behavior: smooth;
-            overflow: hidden; /* Ensure no scrollbars on the page */
-        }
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: #141414;
+      z-index: 1000;
+      border-bottom: 1px solid #ccc;
+    }
 
-        /* Movie Rows with individual scrollbars (hidden) */
-        .row {
-            display: flex;
-            padding: 0 30px; /* Adjusted padding to give space from the sides */
-            -webkit-overflow-scrolling: touch;
-            transition: all 0.3s ease-in-out;
-            scrollbar-width: none;  /* Hide the scrollbar in Firefox */
-            -ms-overflow-style: none;  /* Hide the scrollbar in IE and Edge */
-            cursor: grab; /* Indicate that this is draggable */
-            flex-wrap: nowrap; /* Prevent wrapping of movie icons */
-        }
+    .navbar img {
+      height: 40px;
+    }
 
-        /* Hide the scrollbar in WebKit-based browsers */
-        .row::-webkit-scrollbar {
-            display: none;
-        }
+    .navbar .right-icons {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+    }
 
-        /* Movie images in the rows */
-        .row img {
-            margin-right: 10px;
-            height: 150px;
-            width: 250px;
-            object-fit: cover;
-            cursor: pointer;
-            scroll-snap-align: start;
-            border-radius: 12px;
-            opacity: 0.7;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
+    .navbar .right-icons i {
+      margin: 0 10px;
+      cursor: pointer;
+    }
 
-        .row img:hover {
-            transform: scale(1.05);
-            opacity: 1;
-        }
+    /* Invisible top space to move everything down */
+    .top-space {
+      height: 50px; /* Invisible space */
+    }
 
-        .row img:last-child {
-            margin-right: 0;
-        }
+    /* Row of Movies */
+    .row {
+      display: flex;
+      overflow-x: auto;
+      padding: 0 20px;
+      margin: 20px 0;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      transition: all 0.3s ease-in-out;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(229, 9, 20, 0.7) #141414;
+    }
 
-        /* Invisible block to move everything down */
-        #topSpacer {
-            height: 60px; /* Adjust as necessary to create the desired amount of space */
-            visibility: hidden;
-        }
+    .row::-webkit-scrollbar {
+      height: 10px;
+    }
 
-        /* Movie Embed Modal */
-        #movieEmbed {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
-            justify-content: center;
-            align-items: center;
-            z-index: 1001;
-        }
+    .row::-webkit-scrollbar-track {
+      background-color: rgba(20, 20, 20, 0.7);
+      border-radius: 10px;
+    }
 
-        #movieEmbed iframe {
-            width: 90%;
-            height: 80%;
-            border: none;
-            border-radius: 5px;
-        }
+    .row::-webkit-scrollbar-thumb {
+      background-color: rgba(229, 9, 20, 0.7);
+      border-radius: 10px;
+      border: 2px solid rgba(20, 20, 20, 0.7);
+    }
 
-        #closeBtn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: white;
-            font-size: 30px;
-            cursor: pointer;
-            z-index: 1100;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #e50914;
-            border-radius: 50%;
-            border: none;
-        }
+    .row::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(229, 9, 20, 1);
+    }
 
-        #closeBtn:hover {
-            background-color: #b20710;
-        }
+    .row img {
+      margin-right: 10px;
+      height: 150px;
+      width: 250px;
+      object-fit: cover;
+      cursor: pointer;
+      scroll-snap-align: start;
+      border-radius: 12px;
+      opacity: 0.7;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
 
-        /* Media Queries for PC (larger screens) */
-        @media (min-width: 1024px) {
-            /* Increase sizes for larger screens (PC, Laptop) */
-            .navbar img {
-                height: 60px; /* Bigger Netflix logo */
-            }
+    .row img:hover {
+      transform: scale(1.05);
+      opacity: 1;
+    }
 
-            .section-title {
-                font-size: 30px; /* Larger font for section titles */
-            }
+    /* Movie Embed Modal */
+    #movieEmbed {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
 
-            .row img {
-                height: 200px; /* Bigger movie icons */
-                width: 350px; /* Larger width for movie icons */
-            }
+    #movieEmbed iframe {
+      width: 90%;
+      height: 80%;
+      border: none;
+      border-radius: 5px;
+    }
 
-            .row {
-                padding: 0 40px; /* Slightly more padding in the row */
-            }
+    #closeBtn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      font-size: 30px;
+      cursor: pointer;
+      z-index: 1100;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #e50914;
+      border-radius: 50%;
+      border: none;
+    }
 
-            #topSpacer {
-                height: 80px; /* Slightly larger space for bigger screen */
-            }
-        }
+    #closeBtn:hover {
+      background-color: #b20710;
+    }
 
-    </style>
+    /* Search Box */
+    #searchBox {
+      position: fixed;
+      top: 55px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      align-items: center;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 5px;
+      z-index: 999;
+      width: 80%;
+    }
+
+    #searchInput {
+      width: 80%;
+      padding: 5px;
+      border: none;
+      outline: none;
+      background: #333;
+      color: white;
+    }
+
+    #searchResults {
+      background-color: #333;
+      margin-top: 10px;
+      padding: 10px;
+      display: none;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    #searchResults div {
+      cursor: pointer;
+      padding: 5px;
+      border-bottom: 1px solid #444;
+      display: flex;
+      align-items: center;
+    }
+
+    #searchResults div:hover {
+      background-color: #555;
+    }
+
+    #searchResults img {
+      width: 50px;
+      height: 75px;
+      margin-right: 10px;
+    }
+
+    /* Section Titles */
+    .section-title {
+      margin: 20px 20px 10px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+  </style>
 </head>
+
 <body>
 
-    <!-- Invisible Block for spacing -->
-    <div id="topSpacer"></div>
+  <!-- Invisible Top Block -->
+  <div class="top-space"></div>
 
-    <!-- Movie Categories Sections -->
-    <div id="genres">
-        <div class="section-title">Action Movies</div>
-        <div class="row" id="movieRowAction" onmousedown="startDrag(event, 'movieRowAction')">
-            <!-- Movie posters will be dynamically added here -->
-        </div>
-
-        <div class="section-title">Adventure Movies</div>
-        <div class="row" id="movieRowAdventure" onmousedown="startDrag(event, 'movieRowAdventure')">
-            <!-- Movie posters will be dynamically added here -->
-        </div>
-
-        <div class="section-title">Animation Movies</div>
-        <div class="row" id="movieRowAnimation" onmousedown="startDrag(event, 'movieRowAnimation')">
-            <!-- Movie posters will be dynamically added here -->
-        </div>
-
-        <div class="section-title">Comedy</div>
-        <div class="row" id="movieRowComedy" onmousedown="startDrag(event, 'movieRowComedy')">
-            <!-- Movie posters will be dynamically added here -->
-        </div>
-
-        <div class="section-title">Crime</div>
-        <div class="row" id="movieRowCrime" onmousedown="startDrag(event, 'movieRowCrime')">
-            <!-- Movie posters will be dynamically added here -->
-        </div>
-
-        <div class="section-title">Documentary</div>
-        <div class="row" id="movieRowDocumentary" onmousedown="startDrag(event, 'movieRowDocumentary')">
-            <!-- Movie posters will be dynamically added here -->
-        </div>
-
-        <div class="section-title">Drama</div>
-        <div class="row" id="movieRowDrama" onmousedown="startDrag(event, 'movieRowDrama')">
-            <!-- Movie posters will be dynamically added here -->
-        </div>
-
-        <div class="section-title">Family</div>
-        <div class="row" id="movieRowFamily" onmousedown="startDrag(event, 'movieRowFamily')">
-            <!-- Movie posters will be dynamically added here -->
-        </div>
-
-        <div class="section-title">Fantasy</div>
-        <div class="row" id="movieRowFantasy" onmousedown="startDrag(event, 'movieRowFantasy')">
-            <!-- Movie posters will be dynamically added here -->
-        </div>
-
-        <div class="section-title">Horror</div>
-        <div class="row" id="movieRowHorror" onmousedown="startDrag(event, 'movieRowHorror')">
-            <!-- Movie posters will be dynamically added here -->
-        </div>
-
-        <div class="section-title">Music Movies</div>
-        <div class="row" id="movieRowMusic" onmousedown="startDrag(event, 'movieRowMusic')">
-            <!-- Movie posters will be dynamically added here -->
-        </div>
-
-        <div class="section-title">Mystery</div>
-        <div class="row" id="movieRowMystery" onmousedown="startDrag(event, 'movieRowMystery')">
-            <!-- Movie posters will be dynamically added here -->
-        </div>
-
-        <div class="section-title">Romance</div>
-        <div class="row" id="movieRowRomance" onmousedown="startDrag(event, 'movieRowRomance')">
-            <!-- Movie posters will be dynamically added here -->
-        </div>
-
-        <div class="section-title">Thriller</div>
-        <div class="row" id="movieRowThriller" onmousedown="startDrag(event, 'movieRowThriller')">
-            <!-- Movie posters will be dynamically added here -->
-        </div>
-
-        <div class="section-title">War</div>
-        <div class="row" id="movieRowWar" onmousedown="startDrag(event, 'movieRowWar')">
-            <!-- Movie posters will be dynamically added here -->
-        </div>
-
-        <div class="section-title">Western</div>
-        <div class="row" id="movieRowWestern" onmousedown="startDrag(event, 'movieRowWestern')">
-            <!-- Movie posters will be dynamically added here -->
-        </div>
+  <!-- Navbar -->
+  <div class="navbar" id="navbar">
+    <img alt="Logo" src="https://i.ibb.co/gjBrfcB/c3f62d75a54648c3fcec0d618c004e66.png" width="120" />
+    <div class="right-icons">
+      <i class="fas fa-search" onclick="toggleSearchBox()"></i>
+      <i class="fas fa-tv screen-share-icon" onclick="startScreenSharing()" title="Cast This Page"></i>
+      <i class="fas fa-bell"></i>
+      <i class="fas fa-user"></i>
     </div>
+  </div>
 
-    <!-- Movie Embed Modal -->
-    <div id="movieEmbed">
-        <iframe id="movieIframe" src="" frameborder="0" allowfullscreen></iframe>
-        <button id="closeBtn" onclick="closeEmbed()">×</button>
-    </div>
+  <!-- Search Box -->
+  <div id="searchBox">
+    <input type="text" id="searchInput" placeholder="Search for movies..." oninput="searchMovies()" />
+    <div id="searchResults"></div>
+  </div>
 
-    <script>
-        // API key for TMDB
-        const apiKey = 'd4d5dc37aeb71914016166a958fbe3db';
+  <!-- Movie Categories Sections -->
+  <div id="genres">
+    <div class="section-title">Action Movies</div>
+    <div class="row" id="movieRowAction"></div>
+    <div class="section-title">Adventure Movies</div>
+    <div class="row" id="movieRowAdventure"></div>
+    <div class="section-title">Comedy Movies</div>
+    <div class="row" id="movieRowComedy"></div>
+    <div class="section-title">Horror Movies</div>
+    <div class="row" id="movieRowHorror"></div>
+    <div class="section-title">Drama Movies</div>
+    <div class="row" id="movieRowDrama"></div>
+    <!-- More genres can be added here -->
+  </div>
 
-        // Fetch movie posters from TMDB API by genre
-        function fetchMoviesByGenre(genreId, rowId) {
-            fetch(`https://api.themoviedb.org/3/discover/movie?with_genres=${genreId}&api_key=${apiKey}&language=en-US&page=1`)
-                .then(response => response.json())
-                .then(data => {
-                    const movies = data.results;
-                    const row = document.getElementById(rowId);
-                    row.innerHTML = '';
-                    movies.forEach(movie => {
-                        const movieElement = document.createElement('img');
-                        movieElement.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
-                        movieElement.alt = movie.title;
-                        movieElement.onclick = () => showMovieEmbed(movie.id); // Show embed on click
-                        row.appendChild(movieElement);
-                    });
-                });
-        }
+  <!-- Movie Embed Modal -->
+  <div id="movieEmbed">
+    <iframe id="movieIframe" src="" frameborder="0" allowfullscreen></iframe>
+    <button id="closeBtn" onclick="closeEmbed()">×</button>
+  </div>
 
-        // Call the function to populate movie rows with genres
-        fetchMoviesByGenre(28, 'movieRowAction');
-        fetchMoviesByGenre(12, 'movieRowAdventure');
-        fetchMoviesByGenre(16, 'movieRowAnimation');
-        fetchMoviesByGenre(35, 'movieRowComedy');
-        fetchMoviesByGenre(80, 'movieRowCrime');
-        fetchMoviesByGenre(99, 'movieRowDocumentary');
-        fetchMoviesByGenre(18, 'movieRowDrama');
-        fetchMoviesByGenre(10751, 'movieRowFamily');
-        fetchMoviesByGenre(14, 'movieRowFantasy');
-        fetchMoviesByGenre(27, 'movieRowHorror');
-        fetchMoviesByGenre(10402, 'movieRowMusic');
-        fetchMoviesByGenre(9648, 'movieRowMystery');
-        fetchMoviesByGenre(10749, 'movieRowRomance');
-        fetchMoviesByGenre(53, 'movieRowThriller');
-        fetchMoviesByGenre(10752, 'movieRowWar');
-        fetchMoviesByGenre(37, 'movieRowWestern');
+  <script>
+    const apiKey = 'd4d5dc37aeb71914016166a958fbe3db';
 
-        // Function to handle the dragging of movie rows
-        let isDragging = false;
-        let startX;
-        let scrollLeft;
+    // Fetch movies by genre
+    function fetchMoviesByGenre(genreId, rowId) {
+      fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}&language=en-US&page=1`)
+        .then(response => response.json())
+        .then(data => {
+          const movies = data.results;
+          const row = document.getElementById(rowId);
+          row.innerHTML = '';
+          movies.forEach(movie => {
+            const movieElement = document.createElement('img');
+            movieElement.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
+            movieElement.alt = movie.title;
+            movieElement.onclick = () => showMovieEmbed(movie.id); // Show embed on click
+            row.appendChild(movieElement);
+          });
+        });
+    }
 
-        function startDrag(event, rowId) {
-            isDragging = true;
-            startX = event.pageX;
-            scrollLeft = document.getElementById(rowId).scrollLeft;
-            event.preventDefault();
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('mouseup', stopDrag);
-        }
+    // Show the movie embed (Smashy Stream)
+    function showMovieEmbed(movieId) {
+      const movieEmbed = document.getElementById('movieEmbed');
+      const movieIframe = document.getElementById('movieIframe');
+      movieIframe.src = `https://player.smashy.stream/movie/${movieId}`;
+      movieEmbed.style.display = 'flex';
+    }
 
-        function drag(event) {
-            if (!isDragging) return;
-            const x = event.pageX - startX;
-            document.getElementById('movieRowAction').scrollLeft = scrollLeft - x;
-        }
+    // Close the movie embed modal
+    function closeEmbed() {
+      const movieEmbed = document.getElementById('movieEmbed');
+      movieEmbed.style.display = 'none';
+    }
 
-        function stopDrag() {
-            isDragging = false;
-            document.removeEventListener('mousemove', drag);
-            document.removeEventListener('mouseup', stopDrag);
-        }
+    // Toggle the search box visibility
+    function toggleSearchBox() {
+      const searchBox = document.getElementById('searchBox');
+      searchBox.style.display = searchBox.style.display === 'flex' ? 'none' : 'flex';
+    }
 
-        // Function to show the movie embed modal
-        function showMovieEmbed(movieId) {
-            const embedUrl = `https://player.smashy.stream/movie/${movieId}`;
-            document.getElementById('movieIframe').src = embedUrl;
-            document.getElementById('movieEmbed').style.display = 'flex';
-        }
-
-        function closeEmbed() {
-            document.getElementById('movieEmbed').style.display = 'none';
-        }
-    </script>
+    // Initialize the movie genres
+    fetchMoviesByGenre(28, 'movieRowAction');
+    fetchMoviesByGenre(12, 'movieRowAdventure');
+    fetchMoviesByGenre(35, 'movieRowComedy');
+    fetchMoviesByGenre(27, 'movieRowHorror');
+    fetchMoviesByGenre(18, 'movieRowDrama');
+  </script>
 
 </body>
 </html>
