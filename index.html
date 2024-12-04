@@ -7,6 +7,7 @@
   <title>Narcotix | Pirated Netflix</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
   <style>
     body {
       margin: 0;
@@ -264,64 +265,84 @@
             const movieElement = document.createElement('img');
             movieElement.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
             movieElement.alt = movie.title;
-            movieElement.onclick = () => showMovieEmbed(movie.id);
+            movieElement.onclick = () => openMovieEmbed(movie.id);
             row.appendChild(movieElement);
           });
-        })
-        .catch(error => console.error('Error fetching movies:', error));
+        });
     }
 
-    window.onload = function () {
-      const genres = [
-        { id: 28, name: "Action" },
-        { id: 12, name: "Adventure" },
-        { id: 16, name: "Animation" },
-        { id: 35, name: "Comedy" },
-        { id: 80, name: "Crime" },
-        { id: 99, name: "Documentary" },
-        { id: 18, name: "Drama" },
-        { id: 10751, name: "Family" },
-        { id: 14, name: "Fantasy" },
-        { id: 27, name: "Horror" },
-        { id: 10402, name: "Music" },
-        { id: 9648, name: "Mystery" },
-        { id: 10749, name: "Romance" },
-        { id: 53, name: "Thriller" },
-        { id: 10752, name: "War" },
-        { id: 37, name: "Western" }
-      ];
+    // Search movies function
+    function searchMovies() {
+      const query = document.getElementById('searchInput').value;
+      if (query.length < 3) {
+        document.getElementById('searchResults').style.display = 'none';
+        return;
+      }
 
-      genres.forEach(genre => {
-        fetchMoviesByGenre(genre.id, `movieRow${genre.name}`);
-      });
-    };
-
-    function showMovieEmbed(movieId) {
-      const iframe = document.getElementById('movieIframe');
-      iframe.src = `https://player.smashy.stream/movie/${movieId}`;
-      document.getElementById('movieEmbed').style.display = 'flex';
+      fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+          const results = data.results;
+          const searchResultsDiv = document.getElementById('searchResults');
+          searchResultsDiv.innerHTML = '';
+          if (results.length > 0) {
+            searchResultsDiv.style.display = 'block';
+            results.forEach(result => {
+              const resultElement = document.createElement('div');
+              resultElement.onclick = () => openMovieEmbed(result.id);
+              resultElement.innerHTML = `
+                <img src="https://image.tmdb.org/t/p/w500${result.poster_path}" alt="${result.title}">
+                <div>${result.title}</div>
+              `;
+              searchResultsDiv.appendChild(resultElement);
+            });
+          } else {
+            searchResultsDiv.style.display = 'none';
+          }
+        });
     }
 
-    function closeEmbed() {
-      document.getElementById('movieEmbed').style.display = 'none';
-      document.getElementById('movieIframe').src = '';
-    }
-
-    // Toggle Search Box
+    // Toggle search box visibility
     function toggleSearchBox() {
       const searchBox = document.getElementById('searchBox');
       searchBox.style.display = searchBox.style.display === 'flex' ? 'none' : 'flex';
     }
 
-    // Handle Screen Share
+    // Open the embedded movie in a modal
+    function openMovieEmbed(movieId) {
+      const iframe = document.getElementById('movieIframe');
+      iframe.src = `https://www.youtube.com/embed/${movieId}?autoplay=1`;
+      document.getElementById('movieEmbed').style.display = 'flex';
+    }
+
+    // Close the movie embed modal
+    function closeEmbed() {
+      document.getElementById('movieEmbed').style.display = 'none';
+      document.getElementById('movieIframe').src = '';
+    }
+
+    // Initialize Google Cast API
+    function initializeCastApi() {
+      cast.framework.CastContext.getInstance().setOptions({
+        receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+        autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+      });
+    }
+
+    window['__onGCastApiAvailable'] = function(loaded, errorInfo) {
+      if (loaded) {
+        initializeCastApi();
+      } else {
+        console.log("Google Cast API not available:", errorInfo);
+      }
+    };
+
+    // Start screen sharing and cast to Chromecast
     function startScreenSharing() {
       if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
         navigator.mediaDevices.getDisplayMedia({ video: true })
           .then(stream => {
-            const videoElement = document.createElement('video');
-            videoElement.srcObject = stream;
-            videoElement.play();
-            document.body.appendChild(videoElement);
+            castScreenToDevice(stream);
           })
           .catch(err => {
             console.log("Screen sharing failed: ", err);
@@ -331,27 +352,40 @@
       }
     }
 
-    // Search Movies
-    function searchMovies() {
-      const searchQuery = document.getElementById('searchInput').value;
-      const resultsDiv = document.getElementById('searchResults');
-      if (searchQuery) {
-        resultsDiv.style.display = 'block';
-        fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${searchQuery}&language=en-US`)
-          .then(response => response.json())
-          .then(data => {
-            resultsDiv.innerHTML = '';
-            data.results.forEach(movie => {
-              const resultDiv = document.createElement('div');
-              resultDiv.innerHTML = `<img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" alt="${movie.title}" /> <span>${movie.title}</span>`;
-              resultDiv.onclick = () => showMovieEmbed(movie.id);
-              resultsDiv.appendChild(resultDiv);
-            });
-          });
+    // Cast screen to device (Chromecast)
+    function castScreenToDevice(stream) {
+      const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+      if (castSession) {
+        const mediaInfo = new chrome.cast.media.MediaInfo('screen', 'video/mp4'); // Adjust MIME type if needed
+        mediaInfo.stream = stream;
+        const request = new chrome.cast.media.LoadRequest(mediaInfo);
+        castSession.loadMedia(request, function() {
+          console.log('Screen successfully casted to TV');
+        }, function(error) {
+          console.log('Error casting screen to TV:', error);
+        });
       } else {
-        resultsDiv.style.display = 'none';
+        alert("No Chromecast device is available.");
       }
     }
+
+    // Fetch movies for each genre
+    fetchMoviesByGenre(28, 'movieRowAction');  // Action
+    fetchMoviesByGenre(12, 'movieRowAdventure');  // Adventure
+    fetchMoviesByGenre(16, 'movieRowAnimation');  // Animation
+    fetchMoviesByGenre(35, 'movieRowComedy');  // Comedy
+    fetchMoviesByGenre(80, 'movieRowCrime');  // Crime
+    fetchMoviesByGenre(99, 'movieRowDocumentary');  // Documentary
+    fetchMoviesByGenre(18, 'movieRowDrama');  // Drama
+    fetchMoviesByGenre(10751, 'movieRowFamily');  // Family
+    fetchMoviesByGenre(14, 'movieRowFantasy');  // Fantasy
+    fetchMoviesByGenre(27, 'movieRowHorror');  // Horror
+    fetchMoviesByGenre(10402, 'movieRowMusic');  // Music
+    fetchMoviesByGenre(9648, 'movieRowMystery');  // Mystery
+    fetchMoviesByGenre(10749, 'movieRowRomance');  // Romance
+    fetchMoviesByGenre(53, 'movieRowThriller');  // Thriller
+    fetchMoviesByGenre(10752, 'movieRowWar');  // War
+    fetchMoviesByGenre(37, 'movieRowWestern');  // Western
   </script>
 </body>
 
