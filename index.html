@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
@@ -63,24 +62,26 @@
       -webkit-overflow-scrolling: touch;
       transition: all 0.3s ease-in-out;
       scrollbar-width: thin;
-      scrollbar-color: #e50914 #141414;
+      scrollbar-color: rgba(229, 9, 20, 0.7) #141414;
     }
 
     .row::-webkit-scrollbar {
-      height: 8px;
+      height: 10px;
     }
 
     .row::-webkit-scrollbar-track {
-      background-color: #141414;
-    }
-
-    .row::-webkit-scrollbar-thumb {
-      background-color: #e50914;
+      background-color: rgba(20, 20, 20, 0.7); /* Slightly transparent black */
       border-radius: 10px;
     }
 
+    .row::-webkit-scrollbar-thumb {
+      background-color: rgba(229, 9, 20, 0.7); /* Netflix red with 70% opacity */
+      border-radius: 10px;
+      border: 2px solid rgba(20, 20, 20, 0.7); /* Border with track color */
+    }
+
     .row::-webkit-scrollbar-thumb:hover {
-      background-color: #b20710;
+      background-color: rgba(229, 9, 20, 1); /* Full opacity on hover */
     }
 
     .row img {
@@ -102,10 +103,6 @@
 
     .row img:last-child {
       margin-right: 0;
-    }
-
-    .row img.in-view {
-      opacity: 1;
     }
 
     /* Search Box */
@@ -225,87 +222,88 @@
 
   <!-- Movie Categories Sections -->
   <div id="genres">
-    <div class="section-title">Action Movies</div>
-    <div class="row" id="movieRowAction"></div>
-    <div class="section-title">Adventure Movies</div>
-    <div class="row" id="movieRowAdventure"></div>
-    <div class="section-title">Animation Movies</div>
-    <div class="row" id="movieRowAnimation"></div>
-    <div class="section-title">Comedy</div>
-    <div class="row" id="movieRowComedy"></div>
-    <div class="section-title">Crime</div>
-    <div class="row" id="movieRowCrime"></div>
-    <div class="section-title">Documentary</div>
-    <div class="row" id="movieRowDocumentary"></div>
-    <div class="section-title">Drama</div>
-    <div class="row" id="movieRowDrama"></div>
-    <div class="section-title">Family</div>
-    <div class="row" id="movieRowFamily"></div>
-    <div class="section-title">Fantasy</div>
-    <div class="row" id="movieRowFantasy"></div>
-    <div class="section-title">Horror</div>
-    <div class="row" id="movieRowHorror"></div>
-    <div class="section-title">Music Movies</div>
-    <div class="row" id="movieRowMusic"></div>
-    <div class="section-title">Mystery</div>
-    <div class="row" id="movieRowMystery"></div>
-    <div class="section-title">Romance</div>
-    <div class="row" id="movieRowRomance"></div>
-    <div class="section-title">Thriller</div>
-    <div class="row" id="movieRowThriller"></div>
-    <div class="section-title">War</div>
-    <div class="row" id="movieRowWar"></div>
-    <div class="section-title">Western</div>
-    <div class="row" id="movieRowWestern"></div>
+    <div class="section-title" id="searchCategory" style="display: none;">Search:</div>
+    <div class="row" id="searchResultsRow" style="display: none;"></div>
   </div>
-
-  <!-- Scroll Extender -->
-  <div id="scrollEnd"></div>
 
   <!-- Movie Embed Modal -->
   <div id="movieEmbed">
-    <iframe id="movieIframe" src="" frameborder="0" allowfullscreen></iframe>
-    <button id="closeBtn" onclick="closeEmbed()">×</button>
+    <button id="closeBtn" onclick="closeMovieEmbed()">X</button>
+    <iframe id="movieIframe"></iframe>
   </div>
 
   <script>
-    const apiKey = 'd4d5dc37aeb71914016166a958fbe3db';
+    // Example movie data with URL-like content
+    let movies = [
+      { title: "The Dark Knight", image: "https://image.tmdb.org/t/p/w500/6P3c6kP5Iud7LBnI2LM0yXxtVcd.jpg", videoId: "Lt-QzAl9ZT8" },
+      { title: "Inception", image: "https://image.tmdb.org/t/p/w500/kqjL17yufvn9OVZu3bsR8d9g3I2.jpg", videoId: "YoHD9XEInc0" },
+      { title: "The Matrix", image: "https://image.tmdb.org/t/p/w500/jR3n5z3VOt6zK1D5t4sPq3dceZp.jpg", videoId: "vKQi3bBA1y8" },
+      // Add more movie data objects here
+    ];
 
-    // Fetch movies by genre
-    function fetchMoviesByGenre(genreId, rowId) {
-      fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}&language=en-US&page=1`)
-        .then(response => response.json())
-        .then(data => {
-          const movies = data.results;
-          const row = document.getElementById(rowId);
-          row.innerHTML = '';
-          movies.forEach(movie => {
-            const movieElement = document.createElement('img');
-            movieElement.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
-            movieElement.alt = movie.title;
-            row.appendChild(movieElement);
-          });
-        });
+    // Display movie rows with images and clickable URLs
+    function displayMovies() {
+      const row = document.getElementById("searchResultsRow");
+      row.innerHTML = ""; // Clear previous rows
+      movies.forEach(movie => {
+        const imgElement = document.createElement("img");
+        imgElement.src = movie.image;
+        imgElement.alt = movie.title;
+        imgElement.onclick = () => openMovieEmbed(movie);
+        row.appendChild(imgElement);
+      });
     }
 
-    // Call fetchMoviesByGenre() for each genre section
-    fetchMoviesByGenre(28, 'movieRowAction');
-    fetchMoviesByGenre(12, 'movieRowAdventure');
-    fetchMoviesByGenre(16, 'movieRowAnimation');
-    fetchMoviesByGenre(35, 'movieRowComedy');
-    fetchMoviesByGenre(80, 'movieRowCrime');
-    fetchMoviesByGenre(99, 'movieRowDocumentary');
-    fetchMoviesByGenre(18, 'movieRowDrama');
-    fetchMoviesByGenre(10751, 'movieRowFamily');
-    fetchMoviesByGenre(14, 'movieRowFantasy');
-    fetchMoviesByGenre(27, 'movieRowHorror');
-    fetchMoviesByGenre(10402, 'movieRowMusic');
-    fetchMoviesByGenre(9648, 'movieRowMystery');
-    fetchMoviesByGenre(10749, 'movieRowRomance');
-    fetchMoviesByGenre(53, 'movieRowThriller');
-    fetchMoviesByGenre(10752, 'movieRowWar');
-    fetchMoviesByGenre(37, 'movieRowWestern');
+    // Search movies based on user input
+    function searchMovies() {
+      const query = document.getElementById("searchInput").value.toLowerCase();
+      const searchResults = document.getElementById("searchResults");
+      const searchResultsRow = document.getElementById("searchResultsRow");
+      const searchCategory = document.getElementById("searchCategory");
+
+      searchResults.innerHTML = ""; // Clear previous search results
+      const filteredMovies = movies.filter(movie => movie.title.toLowerCase().includes(query));
+
+      if (filteredMovies.length > 0) {
+        searchCategory.style.display = "block";
+        searchResultsRow.style.display = "block";
+        filteredMovies.forEach(movie => {
+          const resultDiv = document.createElement("div");
+          const img = document.createElement("img");
+          img.src = movie.image;
+          img.alt = movie.title;
+          resultDiv.appendChild(img);
+          resultDiv.innerHTML += movie.title;
+          resultDiv.onclick = () => openMovieEmbed(movie);
+          searchResults.appendChild(resultDiv);
+        });
+      } else {
+        searchResults.innerHTML = "No movies found.";
+      }
+    }
+
+    // Open movie embed modal
+    function openMovieEmbed(movie) {
+      const movieEmbed = document.getElementById('movieEmbed');
+      const iframe = document.getElementById('movieIframe');
+      iframe.src = `https://www.youtube.com/embed/${movie.videoId}`;
+      movieEmbed.style.display = 'flex';
+    }
+
+    // Close movie embed modal
+    function closeMovieEmbed() {
+      document.getElementById('movieEmbed').style.display = 'none';
+      document.getElementById('movieIframe').src = '';
+    }
+
+    // Toggle search box visibility
+    function toggleSearchBox() {
+      const searchBox = document.getElementById('searchBox');
+      searchBox.style.display = searchBox.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    // Display movies initially
+    displayMovies();
   </script>
 </body>
-
 </html>
