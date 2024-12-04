@@ -248,6 +248,7 @@
 
   <script>
     const apiKey = 'd4d5dc37aeb71914016166a958fbe3db';
+    let debounceTimeout;
 
     // Fetch movies by genre
     function fetchMoviesByGenre(genreId, rowId) {
@@ -287,13 +288,45 @@
       searchBox.style.display = searchBox.style.display === 'flex' ? 'none' : 'flex';
     }
 
-    // Initialize the movie genres
+    // Search movies live while typing
+    function searchMovies() {
+      const query = document.getElementById('searchInput').value;
+      if (debounceTimeout) clearTimeout(debounceTimeout);
+
+      debounceTimeout = setTimeout(() => {
+        if (query.length > 2) {
+          fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${query}&language=en-US&page=1`)
+            .then(response => response.json())
+            .then(data => {
+              const searchResults = document.getElementById('searchResults');
+              searchResults.innerHTML = '';
+              if (data.results.length > 0) {
+                searchResults.style.display = 'block';
+                data.results.forEach(movie => {
+                  const movieElement = document.createElement('div');
+                  movieElement.innerHTML = `
+                    <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" />
+                    <span>${movie.title}</span>
+                  `;
+                  movieElement.onclick = () => showMovieEmbed(movie.id);
+                  searchResults.appendChild(movieElement);
+                });
+              } else {
+                searchResults.style.display = 'none';
+              }
+            });
+        } else {
+          document.getElementById('searchResults').style.display = 'none';
+        }
+      }, 500); // Wait for 500ms after typing to trigger the search
+    }
+
+    // Initialize movie genres
     fetchMoviesByGenre(28, 'movieRowAction');
     fetchMoviesByGenre(12, 'movieRowAdventure');
     fetchMoviesByGenre(35, 'movieRowComedy');
     fetchMoviesByGenre(27, 'movieRowHorror');
     fetchMoviesByGenre(18, 'movieRowDrama');
   </script>
-
 </body>
 </html>
