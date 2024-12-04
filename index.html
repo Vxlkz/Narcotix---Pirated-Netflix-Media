@@ -26,12 +26,13 @@
         /* Movie Rows with individual scrollbars (hidden) */
         .row {
             display: flex;
-            padding: 0 20px;
+            padding: 0 30px; /* Adjusted padding to give space from the sides */
             -webkit-overflow-scrolling: touch;
             transition: all 0.3s ease-in-out;
             scrollbar-width: none;  /* Hide the scrollbar in Firefox */
             -ms-overflow-style: none;  /* Hide the scrollbar in IE and Edge */
             cursor: grab; /* Indicate that this is draggable */
+            flex-wrap: nowrap; /* Prevent wrapping of movie icons */
         }
 
         /* Hide the scrollbar in WebKit-based browsers */
@@ -109,6 +110,32 @@
         #closeBtn:hover {
             background-color: #b20710;
         }
+
+        /* Media Queries for PC (larger screens) */
+        @media (min-width: 1024px) {
+            /* Increase sizes for larger screens (PC, Laptop) */
+            .navbar img {
+                height: 60px; /* Bigger Netflix logo */
+            }
+
+            .section-title {
+                font-size: 30px; /* Larger font for section titles */
+            }
+
+            .row img {
+                height: 200px; /* Bigger movie icons */
+                width: 350px; /* Larger width for movie icons */
+            }
+
+            .row {
+                padding: 0 40px; /* Slightly more padding in the row */
+            }
+
+            #topSpacer {
+                height: 80px; /* Slightly larger space for bigger screen */
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -120,9 +147,83 @@
     <div id="genres">
         <div class="section-title">Action Movies</div>
         <div class="row" id="movieRowAction" onmousedown="startDrag(event, 'movieRowAction')">
-            <!-- Movie posters go here -->
+            <!-- Movie posters will be dynamically added here -->
         </div>
-        <!-- Add more genre rows as needed -->
+
+        <div class="section-title">Adventure Movies</div>
+        <div class="row" id="movieRowAdventure" onmousedown="startDrag(event, 'movieRowAdventure')">
+            <!-- Movie posters will be dynamically added here -->
+        </div>
+
+        <div class="section-title">Animation Movies</div>
+        <div class="row" id="movieRowAnimation" onmousedown="startDrag(event, 'movieRowAnimation')">
+            <!-- Movie posters will be dynamically added here -->
+        </div>
+
+        <div class="section-title">Comedy</div>
+        <div class="row" id="movieRowComedy" onmousedown="startDrag(event, 'movieRowComedy')">
+            <!-- Movie posters will be dynamically added here -->
+        </div>
+
+        <div class="section-title">Crime</div>
+        <div class="row" id="movieRowCrime" onmousedown="startDrag(event, 'movieRowCrime')">
+            <!-- Movie posters will be dynamically added here -->
+        </div>
+
+        <div class="section-title">Documentary</div>
+        <div class="row" id="movieRowDocumentary" onmousedown="startDrag(event, 'movieRowDocumentary')">
+            <!-- Movie posters will be dynamically added here -->
+        </div>
+
+        <div class="section-title">Drama</div>
+        <div class="row" id="movieRowDrama" onmousedown="startDrag(event, 'movieRowDrama')">
+            <!-- Movie posters will be dynamically added here -->
+        </div>
+
+        <div class="section-title">Family</div>
+        <div class="row" id="movieRowFamily" onmousedown="startDrag(event, 'movieRowFamily')">
+            <!-- Movie posters will be dynamically added here -->
+        </div>
+
+        <div class="section-title">Fantasy</div>
+        <div class="row" id="movieRowFantasy" onmousedown="startDrag(event, 'movieRowFantasy')">
+            <!-- Movie posters will be dynamically added here -->
+        </div>
+
+        <div class="section-title">Horror</div>
+        <div class="row" id="movieRowHorror" onmousedown="startDrag(event, 'movieRowHorror')">
+            <!-- Movie posters will be dynamically added here -->
+        </div>
+
+        <div class="section-title">Music Movies</div>
+        <div class="row" id="movieRowMusic" onmousedown="startDrag(event, 'movieRowMusic')">
+            <!-- Movie posters will be dynamically added here -->
+        </div>
+
+        <div class="section-title">Mystery</div>
+        <div class="row" id="movieRowMystery" onmousedown="startDrag(event, 'movieRowMystery')">
+            <!-- Movie posters will be dynamically added here -->
+        </div>
+
+        <div class="section-title">Romance</div>
+        <div class="row" id="movieRowRomance" onmousedown="startDrag(event, 'movieRowRomance')">
+            <!-- Movie posters will be dynamically added here -->
+        </div>
+
+        <div class="section-title">Thriller</div>
+        <div class="row" id="movieRowThriller" onmousedown="startDrag(event, 'movieRowThriller')">
+            <!-- Movie posters will be dynamically added here -->
+        </div>
+
+        <div class="section-title">War</div>
+        <div class="row" id="movieRowWar" onmousedown="startDrag(event, 'movieRowWar')">
+            <!-- Movie posters will be dynamically added here -->
+        </div>
+
+        <div class="section-title">Western</div>
+        <div class="row" id="movieRowWestern" onmousedown="startDrag(event, 'movieRowWestern')">
+            <!-- Movie posters will be dynamically added here -->
+        </div>
     </div>
 
     <!-- Movie Embed Modal -->
@@ -132,11 +233,12 @@
     </div>
 
     <script>
-        // Function to fetch movies by genre and populate the rows
+        // API key for TMDB
         const apiKey = 'd4d5dc37aeb71914016166a958fbe3db';
 
+        // Fetch movie posters from TMDB API by genre
         function fetchMoviesByGenre(genreId, rowId) {
-            fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}&language=en-US&page=1`)
+            fetch(`https://api.themoviedb.org/3/discover/movie?with_genres=${genreId}&api_key=${apiKey}&language=en-US&page=1`)
                 .then(response => response.json())
                 .then(data => {
                     const movies = data.results;
@@ -154,7 +256,21 @@
 
         // Call the function to populate movie rows with genres
         fetchMoviesByGenre(28, 'movieRowAction');
-        // Add additional genres here...
+        fetchMoviesByGenre(12, 'movieRowAdventure');
+        fetchMoviesByGenre(16, 'movieRowAnimation');
+        fetchMoviesByGenre(35, 'movieRowComedy');
+        fetchMoviesByGenre(80, 'movieRowCrime');
+        fetchMoviesByGenre(99, 'movieRowDocumentary');
+        fetchMoviesByGenre(18, 'movieRowDrama');
+        fetchMoviesByGenre(10751, 'movieRowFamily');
+        fetchMoviesByGenre(14, 'movieRowFantasy');
+        fetchMoviesByGenre(27, 'movieRowHorror');
+        fetchMoviesByGenre(10402, 'movieRowMusic');
+        fetchMoviesByGenre(9648, 'movieRowMystery');
+        fetchMoviesByGenre(10749, 'movieRowRomance');
+        fetchMoviesByGenre(53, 'movieRowThriller');
+        fetchMoviesByGenre(10752, 'movieRowWar');
+        fetchMoviesByGenre(37, 'movieRowWestern');
 
         // Function to handle the dragging of movie rows
         let isDragging = false;
