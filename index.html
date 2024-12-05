@@ -146,12 +146,6 @@
     .favorite-movies .row img {
       height: 250px;
       width: 180px;
-      object-fit: cover;
-    }
-
-    .recently-watched .row img:hover,
-    .favorite-movies .row img:hover {
-      transform: scale(1.1);
     }
 
     .movie-iframe-container {
@@ -185,6 +179,28 @@
 
     .movie-box {
       position: relative;
+    }
+
+    .movie-description-bubble {
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 5px;
+      max-width: 200px;
+      font-size: 12px;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 1000;
+    }
+
+    .movie-box:hover .movie-description-bubble {
+      display: block;
+      opacity: 1;
     }
   </style>
 </head>
@@ -244,10 +260,27 @@
     <div class="row" id="movieRowSciFi"></div>
     <div class="section-title">Family Movies</div>
     <div class="row" id="movieRowFamily"></div>
+    <div class="section-title">Animation Movies</div>
+    <div class="row" id="movieRowAnimation"></div>
+    <div class="section-title">Documentary Movies</div>
+    <div class="row" id="movieRowDocumentary"></div>
+    <div class="section-title">Music Movies</div>
+    <div class="row" id="movieRowMusic"></div>
+    <div class="section-title">War Movies</div>
+    <div class="row" id="movieRowWar"></div>
+    <div class="section-title">Western Movies</div>
+    <div class="row" id="movieRowWestern"></div>
+    <div class="section-title">Crime Movies</div>
+    <div class="row" id="movieRowCrime"></div>
+    <div class="section-title">Mystery Movies</div>
+    <div class="row" id="movieRowMystery"></div>
+    <div class="section-title">Fantasy Movies</div>
+    <div class="row" id="movieRowFantasy"></div>
   </div>
 
   <script>
-    const MOVIE_API_URL = 'https://api.themoviedb.org/3/discover/movie?api_key=d4d5dc37aeb71914016166a958fbe3db&with_genres=';
+    const MOVIE_API_URL = "https://api.themoviedb.org/3/discover/movie?api_key=d4d5dc37aeb71914016166a958fbe3db&with_genres=";
+    const SEARCH_API_URL = "https://api.themoviedb.org/3/search/movie?api_key=d4d5dc37aeb71914016166a958fbe3db&query=";
     const genres = {
       action: 28,
       adventure: 12,
@@ -257,28 +290,106 @@
       romance: 10749,
       thriller: 53,
       scifi: 878,
-      family: 10751
+      family: 10751,
+      animation: 16,
+      documentary: 99,
+      music: 10402,
+      war: 10752,
+      western: 37,
+      crime: 80,
+      mystery: 9648,
+      fantasy: 14
     };
 
-    const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    const recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [];
+    let favoriteMovies = JSON.parse(localStorage.getItem('favoriteMovies')) || [];
+    let recentlyWatchedMovies = JSON.parse(localStorage.getItem('recentlyWatchedMovies')) || [];
 
-    function updateFavoriteMovies() {
-      const favoriteRow = document.getElementById('movieRowFavorites');
-      favoriteRow.innerHTML = '';
-      favorites.forEach(movie => {
-        const movieBox = createMovieBox(movie, true, true);
-        favoriteRow.appendChild(movieBox);
+    function addToFavorites(movie) {
+      if (!favoriteMovies.some(fav => fav.id === movie.id)) {
+        favoriteMovies.push(movie);
+        localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
+        displayFavoriteMovies();
+      }
+    }
+
+    function removeFromFavorites(movie) {
+      favoriteMovies = favoriteMovies.filter(fav => fav.id !== movie.id);
+      localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
+      displayFavoriteMovies();
+    }
+
+    function addToRecentlyWatched(movie) {
+      if (!recentlyWatchedMovies.some(recent => recent.id === movie.id)) {
+        recentlyWatchedMovies.unshift(movie);
+        if (recentlyWatchedMovies.length > 5) recentlyWatchedMovies.pop();
+        localStorage.setItem('recentlyWatchedMovies', JSON.stringify(recentlyWatchedMovies));
+        displayRecentlyWatchedMovies();
+      }
+    }
+
+    function displayFavoriteMovies() {
+      const movieRow = document.getElementById("movieRowFavorites");
+      movieRow.innerHTML = '';
+      favoriteMovies.forEach(movie => {
+        const movieBox = createMovieBox(movie, true); // true for favorite genre
+        movieRow.appendChild(movieBox);
       });
     }
 
-    function updateRecentlyWatched() {
-      const recentlyWatchedRow = document.getElementById('movieRowRecentlyWatched');
-      recentlyWatchedRow.innerHTML = '';
-      recentlyWatched.forEach(movie => {
-        const movieBox = createMovieBox(movie, false, false);
-        recentlyWatchedRow.appendChild(movieBox);
+    function displayRecentlyWatchedMovies() {
+      const movieRow = document.getElementById("movieRowRecentlyWatched");
+      movieRow.innerHTML = '';
+      recentlyWatchedMovies.forEach(movie => {
+        const movieBox = createMovieBox(movie, false); // false for recently watched movies
+        movieRow.appendChild(movieBox);
       });
+    }
+
+    function createMovieBox(movie, isFavorite) {
+      const movieBox = document.createElement("div");
+      movieBox.classList.add("movie-box");
+
+      const movieImg = document.createElement("img");
+      movieImg.src = "https://image.tmdb.org/t/p/w185" + movie.poster_path;
+      movieImg.alt = movie.title;
+
+      const movieTitle = document.createElement("div");
+      movieTitle.classList.add("movie-name");
+      movieTitle.innerText = movie.title;
+
+      const movieYear = document.createElement("div");
+      movieYear.classList.add("movie-year");
+      movieYear.innerText = new Date(movie.release_date).getFullYear();
+
+      movieBox.addEventListener("click", function() {
+        addToRecentlyWatched(movie);
+        openMovieIframe(movie.id);
+      });
+
+      if (isFavorite) {
+        const starIcon = document.createElement("i");
+        starIcon.classList.add("fas", "fa-star", "star-icon");
+        if (favoriteMovies.some(fav => fav.id === movie.id)) {
+          starIcon.classList.add("filled");
+        }
+        starIcon.addEventListener("click", function(event) {
+          event.stopPropagation();
+          if (favoriteMovies.some(fav => fav.id === movie.id)) {
+            removeFromFavorites(movie);
+            starIcon.classList.remove("filled");
+          } else {
+            addToFavorites(movie);
+            starIcon.classList.add("filled");
+          }
+        });
+        movieBox.appendChild(starIcon);
+      }
+
+      movieBox.appendChild(movieImg);
+      movieBox.appendChild(movieTitle);
+      movieBox.appendChild(movieYear);
+
+      return movieBox;
     }
 
     async function fetchMovies() {
@@ -286,134 +397,62 @@
         const genreId = genres[genre];
         const movieRow = document.getElementById(`movieRow${genre.charAt(0).toUpperCase() + genre.slice(1)}`);
         const response = await fetch(MOVIE_API_URL + genreId);
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.results && data.results.length > 0) {
-            data.results.forEach(movie => {
-              const movieBox = createMovieBox(movie, false, false);
-              movieRow.appendChild(movieBox);
-            });
-          }
-        }
+        const data = await response.json();
+        data.results.forEach(movie => {
+          const movieBox = createMovieBox(movie, false); // false for genres
+          movieRow.appendChild(movieBox);
+        });
       }
     }
 
-    function createMovieBox(movie, isFavorite, isInGenre) {
-      const movieBox = document.createElement('div');
-      movieBox.classList.add('movie-box');
-
-      const movieImage = document.createElement('img');
-      movieImage.src = `https://image.tmdb.org/t/p/w500/${movie.poster_path}`;
-      movieImage.alt = movie.title;
-      movieImage.onclick = () => openMovieEmbed(movie);
-
-      const movieName = document.createElement('div');
-      movieName.classList.add('movie-name');
-      movieName.textContent = movie.title;
-
-      const movieYear = document.createElement('div');
-      movieYear.classList.add('movie-year');
-      movieYear.textContent = movie.release_date ? movie.release_date.split('-')[0] : 'N/A';
-
-      if (isInGenre) {
-        const favoriteIcon = document.createElement('i');
-        favoriteIcon.classList.add('fas', 'fa-star', 'star-icon');
-        if (favorites.some(fav => fav.id === movie.id)) {
-          favoriteIcon.classList.add('filled');
-        }
-
-        favoriteIcon.onclick = () => toggleFavorite(movie, favoriteIcon);
-        movieBox.appendChild(favoriteIcon);
-      }
-
-      if (isFavorite) {
-        const removeFavIcon = document.createElement('i');
-        removeFavIcon.classList.add('fas', 'fa-times', 'remove-fav-icon');
-        removeFavIcon.onclick = () => removeFavorite(movie);
-        movieBox.appendChild(removeFavIcon);
-      }
-
-      movieBox.appendChild(movieImage);
-      movieBox.appendChild(movieName);
-      movieBox.appendChild(movieYear);
-
-      return movieBox;
-    }
-
-    function toggleFavorite(movie, icon) {
-      const isFavorite = favorites.some(fav => fav.id === movie.id);
-      if (isFavorite) {
-        const index = favorites.findIndex(fav => fav.id === movie.id);
-        favorites.splice(index, 1);
-        icon.classList.remove('filled');
-      } else {
-        favorites.push(movie);
-        icon.classList.add('filled');
-      }
-      localStorage.setItem('favorites', JSON.stringify(favorites));
-      updateFavoriteMovies();
-    }
-
-    function removeFavorite(movie) {
-      const index = favorites.findIndex(fav => fav.id === movie.id);
-      if (index !== -1) {
-        favorites.splice(index, 1);
-        localStorage.setItem('favorites', JSON.stringify(favorites));
-        updateFavoriteMovies();
-      }
-    }
-
-    function openMovieEmbed(movie) {
-      const movieIframeContainer = document.getElementById('movieIframeContainer');
-      const movieIframe = document.getElementById('movieIframe');
-      movieIframe.src = `https://www.youtube.com/embed/${movie.id}`;
-      movieIframeContainer.style.display = 'flex';
-
-      // Add to recently watched
-      if (!recentlyWatched.some(watch => watch.id === movie.id)) {
-        recentlyWatched.unshift(movie);
-        if (recentlyWatched.length > 10) {
-          recentlyWatched.pop();
-        }
-        localStorage.setItem('recentlyWatched', JSON.stringify(recentlyWatched));
-        updateRecentlyWatched();
-      }
+    function openMovieIframe(movieId) {
+      const iframeContainer = document.getElementById("movieIframeContainer");
+      const iframe = document.getElementById("movieIframe");
+      iframe.src = `https://player.smashy.stream/movie/${movieId}`;
+      iframeContainer.style.display = "flex";
     }
 
     function closeMovieEmbed() {
-      const movieIframeContainer = document.getElementById('movieIframeContainer');
-      movieIframeContainer.style.display = 'none';
+      const iframeContainer = document.getElementById("movieIframeContainer");
+      const iframe = document.getElementById("movieIframe");
+      iframeContainer.style.display = "none";
+      iframe.src = '';
     }
 
     function toggleSearchBox() {
-      const searchBox = document.getElementById('searchBar');
-      searchBox.style.display = searchBox.style.display === 'none' ? 'block' : 'none';
+      const searchBox = document.getElementById("searchBar");
+      searchBox.style.display = searchBox.style.display === "block" ? "none" : "block";
     }
 
     function searchMovies() {
-      const query = document.getElementById('searchBar').value;
-      if (query.length > 2) {
-        const searchRow = document.getElementById('movieRowSearchResults');
-        searchRow.innerHTML = '';
-        const filteredMovies = [...favorites, ...recentlyWatched].filter(movie =>
-          movie.title.toLowerCase().includes(query.toLowerCase())
-        );
-        filteredMovies.forEach(movie => {
-          const movieBox = createMovieBox(movie, false, false);
-          searchRow.appendChild(movieBox);
-        });
+      const searchQuery = document.getElementById("searchBar").value.toLowerCase();
+      const movieRows = document.querySelectorAll(".row");
+      movieRows.forEach(row => {
+        row.innerHTML = '';
+      });
+
+      if (searchQuery) {
         document.querySelector('.search-results').style.display = 'block';
+        fetch(`${SEARCH_API_URL}${searchQuery}`)
+          .then(response => response.json())
+          .then(data => {
+            const searchResultsRow = document.getElementById("movieRowSearchResults");
+            data.results.forEach(movie => {
+              const movieBox = createMovieBox(movie, false);
+              searchResultsRow.appendChild(movieBox);
+            });
+          });
       } else {
         document.querySelector('.search-results').style.display = 'none';
+        fetchMovies();
       }
     }
 
     window.onload = function() {
+      displayFavoriteMovies();
+      displayRecentlyWatchedMovies();
       fetchMovies();
-      updateFavoriteMovies();
-      updateRecentlyWatched();
-    };
+    }
   </script>
 
 </body>
