@@ -264,11 +264,11 @@
     const recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [];
 
     function updateFavoriteMovies() {
-      const favoritesRow = document.getElementById('movieRowFavorites');
-      favoritesRow.innerHTML = '';
+      const favoriteRow = document.getElementById('movieRowFavorites');
+      favoriteRow.innerHTML = '';
       favorites.forEach(movie => {
-        const movieBox = createMovieBox(movie, true);
-        favoritesRow.appendChild(movieBox);
+        const movieBox = createMovieBox(movie, true, true);
+        favoriteRow.appendChild(movieBox);
       });
     }
 
@@ -276,7 +276,7 @@
       const recentlyWatchedRow = document.getElementById('movieRowRecentlyWatched');
       recentlyWatchedRow.innerHTML = '';
       recentlyWatched.forEach(movie => {
-        const movieBox = createMovieBox(movie, false);
+        const movieBox = createMovieBox(movie, false, false);
         recentlyWatchedRow.appendChild(movieBox);
       });
     }
@@ -291,7 +291,7 @@
           const data = await response.json();
           if (data.results && data.results.length > 0) {
             data.results.forEach(movie => {
-              const movieBox = createMovieBox(movie, false);
+              const movieBox = createMovieBox(movie, false, false);
               movieRow.appendChild(movieBox);
             });
           }
@@ -299,7 +299,7 @@
       }
     }
 
-    function createMovieBox(movie, isFavorite) {
+    function createMovieBox(movie, isFavorite, isInGenre) {
       const movieBox = document.createElement('div');
       movieBox.classList.add('movie-box');
 
@@ -316,18 +316,27 @@
       movieYear.classList.add('movie-year');
       movieYear.textContent = movie.release_date ? movie.release_date.split('-')[0] : 'N/A';
 
-      const favoriteIcon = document.createElement('i');
-      favoriteIcon.classList.add('fas', 'fa-star', 'star-icon');
-      if (favorites.some(fav => fav.id === movie.id)) {
-        favoriteIcon.classList.add('filled');
+      if (isInGenre) {
+        const favoriteIcon = document.createElement('i');
+        favoriteIcon.classList.add('fas', 'fa-star', 'star-icon');
+        if (favorites.some(fav => fav.id === movie.id)) {
+          favoriteIcon.classList.add('filled');
+        }
+
+        favoriteIcon.onclick = () => toggleFavorite(movie, favoriteIcon);
+        movieBox.appendChild(favoriteIcon);
       }
 
-      favoriteIcon.onclick = () => toggleFavorite(movie, favoriteIcon);
+      if (isFavorite) {
+        const removeFavIcon = document.createElement('i');
+        removeFavIcon.classList.add('fas', 'fa-times', 'remove-fav-icon');
+        removeFavIcon.onclick = () => removeFavorite(movie);
+        movieBox.appendChild(removeFavIcon);
+      }
 
       movieBox.appendChild(movieImage);
       movieBox.appendChild(movieName);
       movieBox.appendChild(movieYear);
-      movieBox.appendChild(favoriteIcon);
 
       return movieBox;
     }
@@ -344,6 +353,15 @@
       }
       localStorage.setItem('favorites', JSON.stringify(favorites));
       updateFavoriteMovies();
+    }
+
+    function removeFavorite(movie) {
+      const index = favorites.findIndex(fav => fav.id === movie.id);
+      if (index !== -1) {
+        favorites.splice(index, 1);
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        updateFavoriteMovies();
+      }
     }
 
     function openMovieEmbed(movie) {
@@ -382,7 +400,7 @@
           movie.title.toLowerCase().includes(query.toLowerCase())
         );
         filteredMovies.forEach(movie => {
-          const movieBox = createMovieBox(movie, false);
+          const movieBox = createMovieBox(movie, false, false);
           searchRow.appendChild(movieBox);
         });
         document.querySelector('.search-results').style.display = 'block';
