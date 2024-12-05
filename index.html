@@ -186,28 +186,6 @@
     .movie-box {
       position: relative;
     }
-
-    .movie-description-bubble {
-      position: absolute;
-      top: -40px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: rgba(0, 0, 0, 0.8);
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 5px;
-      max-width: 200px;
-      font-size: 12px;
-      display: none;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: 1000;
-    }
-
-    .movie-box:hover .movie-description-bubble {
-      display: block;
-      opacity: 1;
-    }
   </style>
 </head>
 
@@ -338,10 +316,6 @@
       movieYear.classList.add('movie-year');
       movieYear.textContent = movie.release_date ? movie.release_date.split('-')[0] : 'N/A';
 
-      const movieDescriptionBubble = document.createElement('div');
-      movieDescriptionBubble.classList.add('movie-description-bubble');
-      movieDescriptionBubble.textContent = movie.overview ? movie.overview : 'No description available.';
-
       const favoriteIcon = document.createElement('i');
       favoriteIcon.classList.add('fas', 'fa-star', 'star-icon');
       if (favorites.some(fav => fav.id === movie.id)) {
@@ -353,7 +327,6 @@
       movieBox.appendChild(movieImage);
       movieBox.appendChild(movieName);
       movieBox.appendChild(movieYear);
-      movieBox.appendChild(movieDescriptionBubble);
       movieBox.appendChild(favoriteIcon);
 
       return movieBox;
