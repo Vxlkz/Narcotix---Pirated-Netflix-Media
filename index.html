@@ -364,22 +364,29 @@
       }
     }
 
-    function openMovieEmbed(movie) {
-      const movieIframeContainer = document.getElementById('movieIframeContainer');
-      const movieIframe = document.getElementById('movieIframe');
-      movieIframe.src = `https://player.smashy.stream/movie/${movie.id}`;
-      movieIframeContainer.style.display = 'flex';
+function openMovieEmbed(movie) {
+  const movieIframeContainer = document.getElementById('movieIframeContainer');
+  const movieIframe = document.getElementById('movieIframe');
+  movieIframe.src = `https://player.smashy.stream/movie/${movie.id}`;
+  movieIframeContainer.style.display = 'flex';
 
-      // Add to recently watched
-      if (!recentlyWatched.some(watch => watch.id === movie.id)) {
-        recentlyWatched.unshift(movie);
-        if (recentlyWatched.length > 10) {
-          recentlyWatched.pop();
-        }
-        localStorage.setItem('recentlyWatched', JSON.stringify(recentlyWatched));
-        updateRecentlyWatched();
-      }
-    }
+  // Move to front if movie is already in the recently watched list
+  const existingMovieIndex = recentlyWatched.findIndex(watch => watch.id === movie.id);
+  if (existingMovieIndex !== -1) {
+    recentlyWatched.splice(existingMovieIndex, 1); // Remove the movie from its current position
+  }
+  recentlyWatched.unshift(movie); // Add movie to the front of the list
+
+  // Ensure that the list never exceeds 10 items
+  if (recentlyWatched.length > 10) {
+    recentlyWatched.pop(); // Remove the last movie if there are more than 10
+  }
+
+  // Update localStorage and the UI
+  localStorage.setItem('recentlyWatched', JSON.stringify(recentlyWatched));
+  updateRecentlyWatched();
+}
+
 
     function closeMovieEmbed() {
       const movieIframeContainer = document.getElementById('movieIframeContainer');
