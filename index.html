@@ -270,37 +270,36 @@
       }
     }
 
-function createMovieBox(movie, isFavorite = false) {
-  const box = document.createElement('div');
-  box.classList.add('movie-box');
+    function createMovieBox(movie, isFavorite = false) {
+      const box = document.createElement('div');
+      box.classList.add('movie-box');
   
-  // Set the correct icon class based on the favorite status
-  const iconClass = isFavorite ? 'fas fa-times remove-from-favorites' : 'fas fa-plus add-to-favorites';
-
-  box.innerHTML = `
-    <div class="movie-image-container">
-      <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" onclick="openMovieEmbed(${JSON.stringify(movie)})" />
-      <i class="${iconClass}" onclick="toggleFavorite(${JSON.stringify(movie)}, ${isFavorite})"></i>
-    </div>
-    <div class="movie-name">${movie.title}</div>
-    <div class="movie-year">${new Date(movie.release_date).getFullYear()}</div>
-  `;
+      // Set the correct icon class based on the favorite status
+      const iconClass = isFavorite ? 'fas fa-times remove-from-favorites' : 'fas fa-plus add-to-favorites';
   
-  // Reattach the click event to open the movie embed
-  box.querySelector('img').addEventListener('click', () => openMovieEmbed(movie));
-
-  return box;
-}
-
-// Function to toggle the favorite status
-function toggleFavorite(movie, isFavorite) {
-  if (isFavorite) {
-    removeFromFavorites(movie); // Assuming you have this function
-  } else {
-    addToFavorites(movie); // Assuming you have this function
-  }
-}
-
+      box.innerHTML = `
+        <div class="movie-image-container">
+          <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" onclick="openMovieEmbed(${JSON.stringify(movie)})" />
+          <i class="${iconClass}" onclick="toggleFavorite(${JSON.stringify(movie)}, ${isFavorite})"></i>
+        </div>
+        <div class="movie-name">${movie.title}</div>
+        <div class="movie-year">${new Date(movie.release_date).getFullYear()}</div>
+      `;
+  
+      // Reattach the click event to open the movie embed
+      box.querySelector('img').addEventListener('click', () => openMovieEmbed(movie));
+  
+      return box;
+    }
+  
+    // Function to toggle the favorite status
+    function toggleFavorite(movie, isFavorite) {
+      if (isFavorite) {
+        removeFromFavorites(movie); // Assuming you have this function
+      } else {
+        addToFavorites(movie); // Assuming you have this function
+      }
+    }
 
     function openMovieEmbed(movie) {
       const movieIframeContainer = document.getElementById('movieIframeContainer');
