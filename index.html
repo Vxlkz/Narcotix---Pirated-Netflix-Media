@@ -210,6 +210,11 @@
     <span class="close-iframe" onclick="closeMovieEmbed()">×</span>
   </div>
 
+  <div class="favorite-movies">
+    <div class="section-title">Favorite Movies</div>
+    <div class="row" id="movieRowFavorites"></div>
+  </div>
+
   <div class="recently-watched">
     <div class="section-title">Recently Watched</div>
     <div class="row" id="movieRowRecentlyWatched"></div>
@@ -362,7 +367,7 @@
     function openMovieEmbed(movie) {
       const movieIframeContainer = document.getElementById('movieIframeContainer');
       const movieIframe = document.getElementById('movieIframe');
-      movieIframe.src = `https://watchwave-v2.vercel.app/watch/movie/${movie.id}`;
+      movieIframe.src = `https://www.youtube.com/embed/${movie.id}`;
       movieIframeContainer.style.display = 'flex';
 
       // Add to recently watched
