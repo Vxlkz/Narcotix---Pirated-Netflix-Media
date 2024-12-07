@@ -367,7 +367,7 @@
     function openMovieEmbed(movie) {
       const movieIframeContainer = document.getElementById('movieIframeContainer');
       const movieIframe = document.getElementById('movieIframe');
-      movieIframe.src = `https://www.youtube.com/embed/${movie.id}`;
+      movieIframe.src = `https://player.smashy.stream/movie/${movie.id}`;
       movieIframeContainer.style.display = 'flex';
 
       // Add to recently watched
