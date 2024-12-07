@@ -184,6 +184,22 @@
       display: block;
     }
 
+    .movie-rating {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: red;
+      color: white;
+      font-weight: bold;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .genre-container {
+      margin-top: 40px;
+    }
+
   </style>
 </head>
 
@@ -223,69 +239,67 @@
     <div class="row" id="movieRowSearchResults"></div>
   </div>
 
-  <div class="action-movies">
-    <div class="section-title">Action Movies</div>
-    <div class="row" id="movieRowAction"></div>
-  </div>
-
-  <div class="comedy-movies">
-    <div class="section-title">Comedy Movies</div>
-    <div class="row" id="movieRowComedy"></div>
-  </div>
-
-  <div class="drama-movies">
-    <div class="section-title">Drama Movies</div>
-    <div class="row" id="movieRowDrama"></div>
-  </div>
-
-  <div class="scifi-movies">
-    <div class="section-title">Sci-Fi Movies</div>
-    <div class="row" id="movieRowSciFi"></div>
-  </div>
-
-  <div class="family-movies">
-    <div class="section-title">Family Movies</div>
-    <div class="row" id="movieRowFamily"></div>
-  </div>
+  <div class="genre-container" id="genresContainer"></div> <!-- Dynamic Genres Section -->
 
   <script>
     const MOVIE_API_URL = 'https://api.themoviedb.org/3/discover/movie?api_key=d4d5dc37aeb71914016166a958fbe3db&with_genres=';
-    const genres = {
-      action: 28,
-      adventure: 12,
-      comedy: 35,
-      horror: 27,
-      drama: 18,
-      romance: 10749,
-      thriller: 53,
-      scifi: 878,
-      family: 10751
-    };
+    const GENRE_API_URL = 'https://api.themoviedb.org/3/genre/movie/list?api_key=d4d5dc37aeb71914016166a958fbe3db';
 
+    let allGenres = {};
     const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
     const recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [];
 
-    function updateFavoriteMovies() {
-      const favoriteRow = document.getElementById('movieRowFavorites');
-      favoriteRow.innerHTML = '';
-      favorites.forEach(movie => {
-        const movieBox = createMovieBox(movie, true);
-        favoriteRow.appendChild(movieBox);
-      });
+    async function fetchGenres() {
+      try {
+        const response = await fetch(GENRE_API_URL);
+        if (response.ok) {
+          const data = await response.json();
+          allGenres = data.genres.reduce((acc, genre) => {
+            acc[genre.name.toLowerCase()] = genre.id;  // Store genre name and id
+            return acc;
+          }, {});
+          generateGenreSections();
+          fetchMovies();
+        } else {
+          console.error("Failed to fetch genres");
+        }
+      } catch (error) {
+        console.error("Error fetching genres:", error);
+      }
     }
 
-    function updateRecentlyWatched() {
-      const recentlyWatchedRow = document.getElementById('movieRowRecentlyWatched');
-      recentlyWatchedRow.innerHTML = '';
-      recentlyWatched.forEach(movie => {
-        const movieBox = createMovieBox(movie, false);
-        recentlyWatchedRow.appendChild(movieBox);
-      });
+    function generateGenreSections() {
+      const genreContainer = document.getElementById('genresContainer');
+      genreContainer.innerHTML = '';
+
+      for (const genreName in allGenres) {
+        const genreId = allGenres[genreName];
+        const section = document.createElement('div');
+        section.classList.add('genre-section');
+        const sectionTitle = document.createElement('div');
+        sectionTitle.classList.add('section-title');
+        sectionTitle.textContent = genreName.charAt(0).toUpperCase() + genreName.slice(1) + ' Movies';
+        section.appendChild(sectionTitle);
+
+        const movieRow = document.createElement('div');
+        movieRow.classList.add('row');
+        movieRow.id = `movieRow${capitalizeFirstLetter(genreName)}`;
+        section.appendChild(movieRow);
+
+        genreContainer.appendChild(section);
+      }
+    }
+
+    function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
     async function fetchMovies() {
-      for (const [genre, genreId] of Object.entries(genres)) {
-        const movieRow = document.getElementById(`movieRow${genre.charAt(0).toUpperCase() + genre.slice(1)}`);
+      for (const genreName in allGenres) {
+        const genreId = allGenres[genreName];
+        const movieRow = document.getElementById(`movieRow${capitalizeFirstLetter(genreName)}`);
+        if (!movieRow) continue;
+
         const response = await fetch(MOVIE_API_URL + genreId);
 
         if (response.ok) {
@@ -297,20 +311,52 @@
             });
           } else {
             const noMoviesMessage = document.createElement('div');
-            noMoviesMessage.textContent = `No movies available for ${genre} genre.`;
+            noMoviesMessage.textContent = `No movies available for ${genreName} genre.`;
             movieRow.appendChild(noMoviesMessage);
           }
+        } else {
+          console.error("Failed to fetch movies for genre:", genreName);
         }
       }
     }
 
-noMoviesMessage);
-          }
-        }
-      }
+    function createMovieBox(movie, isFavorite) {
+      const movieBox = document.createElement('div');
+      movieBox.classList.add('movie-box');
+
+      const movieImage = document.createElement('img');
+      movieImage.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
+      movieImage.alt = movie.title;
+      movieBox.appendChild(movieImage);
+
+      const movieName = document.createElement('div');
+      movieName.classList.add('movie-name');
+      movieName.textContent = movie.title;
+      movieBox.appendChild(movieName);
+
+      const movieYear = document.createElement('div');
+      movieYear.classList.add('movie-year');
+      movieYear.textContent = movie.release_date.split('-')[0];
+      movieBox.appendChild(movieYear);
+
+      const plusIcon = document.createElement('i');
+      plusIcon.classList.add('fas', 'fa-plus', 'plus-icon');
+      if (isFavorite) plusIcon.classList.add('filled');
+      plusIcon.onclick = () => toggleFavorite(movie, plusIcon);
+      movieBox.appendChild(plusIcon);
+
+      const arrowIcon = document.createElement('i');
+      arrowIcon.classList.add('fas', 'fa-chevron-down', 'arrow-icon');
+      arrowIcon.onclick = () => toggleMovieInfo(movieBox);
+      movieBox.appendChild(arrowIcon);
+
+      const movieInfo = document.createElement('div');
+      movieInfo.classList.add('movie-info');
+      movieInfo.innerHTML = `<p>${movie.overview}</p>`;
+      movieBox.appendChild(movieInfo);
+
+      return movieBox;
     }
-
-
 
     function toggleMovieInfo(movieBox) {
       const info = movieBox.querySelector('.movie-info');
@@ -333,23 +379,13 @@ noMoviesMessage);
       updateFavoriteMovies();
     }
 
-    function openMovieEmbed(movie) {
-      const iframeContainer = document.getElementById('movieIframeContainer');
-      const iframe = document.getElementById('movieIframe');
-      iframe.src = `https://www.youtube.com/embed/${movie.id}?autoplay=1`;
-      iframeContainer.style.display = 'block';
-    }
-
-    function closeMovieEmbed() {
-      const iframeContainer = document.getElementById('movieIframeContainer');
-      const iframe = document.getElementById('movieIframe');
-      iframe.src = '';
-      iframeContainer.style.display = 'none';
-    }
-
-    function toggleSearchBox() {
-      const searchBox = document.getElementById('searchBar');
-      searchBox.style.display = searchBox.style.display === 'none' ? 'block' : 'none';
+    function updateFavoriteMovies() {
+      const favoriteRow = document.getElementById('movieRowFavorites');
+      favoriteRow.innerHTML = '';
+      favorites.forEach(movie => {
+        const movieBox = createMovieBox(movie, true);
+        favoriteRow.appendChild(movieBox);
+      });
     }
 
     function searchMovies() {
@@ -369,9 +405,8 @@ noMoviesMessage);
     }
 
     window.onload = () => {
-      fetchMovies();
+      fetchGenres();
       updateFavoriteMovies();
-      updateRecentlyWatched();
     };
   </script>
 
