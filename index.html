@@ -163,6 +163,24 @@
     .movie-box {
       position: relative;
     }
+
+    /* Position the plus icon at the bottom right */
+    .movie-image-container i {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      font-size: 30px; /* Increase size */
+      color: white;
+      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+      border-radius: 50%;
+      padding: 10px;
+      cursor: pointer;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .movie-image-container i:hover {
+      transform: scale(1.2);
+    }
   </style>
 </head>
 
@@ -276,7 +294,7 @@
   
       // Set the correct icon class based on the favorite status
       const iconClass = isFavorite ? 'fas fa-times remove-from-favorites' : 'fas fa-plus add-to-favorites';
-  
+
       box.innerHTML = `
         <div class="movie-image-container">
           <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" onclick="openMovieEmbed(${JSON.stringify(movie)})" />
@@ -291,7 +309,7 @@
   
       return box;
     }
-  
+
     // Function to toggle the favorite status
     function toggleFavorite(movie, isFavorite) {
       if (isFavorite) {
