@@ -304,44 +304,13 @@
       }
     }
 
-    function createMovieBox(movie, isFavorite) {
-      const movieBox = document.createElement('div');
-      movieBox.classList.add('movie-box');
-
-      const img = document.createElement('img');
-      img.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
-      img.alt = movie.title;
-      img.onclick = () => openMovieEmbed(movie);
-      
-      const arrowIcon = document.createElement('i');
-      arrowIcon.classList.add('fas', 'fa-chevron-down', 'arrow-icon');
-      arrowIcon.onclick = () => toggleMovieInfo(movieBox);
-
-      const plusIcon = document.createElement('i');
-      plusIcon.classList.add('fas', 'fa-plus', 'plus-icon');
-      plusIcon.onclick = () => toggleFavorite(movie, plusIcon);
-
-      const movieName = document.createElement('div');
-      movieName.classList.add('movie-name');
-      movieName.textContent = movie.title;
-
-      const movieYear = document.createElement('div');
-      movieYear.classList.add('movie-year');
-      movieYear.textContent = new Date(movie.release_date).getFullYear();
-
-      const movieInfo = document.createElement('div');
-      movieInfo.classList.add('movie-info');
-      movieInfo.innerHTML = `<p>${movie.overview}</p><p>Duration: ${movie.runtime || 'N/A'} minutes</p>`;
-      
-      movieBox.appendChild(img);
-      movieBox.appendChild(arrowIcon);
-      movieBox.appendChild(plusIcon);
-      movieBox.appendChild(movieName);
-      movieBox.appendChild(movieYear);
-      movieBox.appendChild(movieInfo);
-
-      return movieBox;
+noMoviesMessage);
+          }
+        }
+      }
     }
+
+
 
     function toggleMovieInfo(movieBox) {
       const info = movieBox.querySelector('.movie-info');
