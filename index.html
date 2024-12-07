@@ -293,12 +293,18 @@ async function fetchMovies() {
 
     if (response.ok) {
       const data = await response.json();
+      console.log(`Movies for genre ${genre}:`, data); // Add this to check the response
+
       if (data.results && data.results.length > 0) {
         data.results.forEach(movie => {
           const movieBox = createMovieBox(movie, false); // false indicates this is not a favorite
           movieRow.appendChild(movieBox);
         });
+      } else {
+        console.log(`No movies found for genre ${genre}`); // Log if no movies are found
       }
+    } else {
+      console.log(`Error fetching movies for genre ${genre}:`, response.status); // Log errors if any
     }
   }
 }
