@@ -148,7 +148,7 @@
       width: 100%;
       height: 100%;
       border: none;
-      object-fit: contain;
+      object-fit: contain; /* Ensures content fits inside the iframe without stretching */
     }
 
     .close-iframe {
@@ -163,24 +163,6 @@
     .movie-box {
       position: relative;
     }
-
-    .movie-image-container i {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      font-size: 30px; /* Bigger button size */
-      color: white;
-      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-      border-radius: 50%;
-      padding: 10px;
-      cursor: pointer;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-    }
-
-    .movie-image-container i:hover {
-      transform: scale(1.2);
-    }
-
   </style>
 </head>
 
@@ -291,10 +273,10 @@
     function createMovieBox(movie, isFavorite = false) {
       const box = document.createElement('div');
       box.classList.add('movie-box');
-      
+  
       // Set the correct icon class based on the favorite status
       const iconClass = isFavorite ? 'fas fa-times remove-from-favorites' : 'fas fa-plus add-to-favorites';
-
+  
       box.innerHTML = `
         <div class="movie-image-container">
           <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" onclick="openMovieEmbed(${JSON.stringify(movie)})" />
@@ -303,37 +285,27 @@
         <div class="movie-name">${movie.title}</div>
         <div class="movie-year">${new Date(movie.release_date).getFullYear()}</div>
       `;
-      
+  
+      // Reattach the click event to open the movie embed
       box.querySelector('img').addEventListener('click', () => openMovieEmbed(movie));
-
+  
       return box;
     }
-
+  
+    // Function to toggle the favorite status
     function toggleFavorite(movie, isFavorite) {
       if (isFavorite) {
-        removeFromFavorites(movie);
+        removeFromFavorites(movie); // Assuming you have this function
       } else {
-        addToFavorites(movie);
+        addToFavorites(movie); // Assuming you have this function
       }
-    }
-
-    function addToFavorites(movie) {
-      favorites.push(movie);
-      localStorage.setItem('favorites', JSON.stringify(favorites));
-      updateFavoriteMovies();
-    }
-
-    function removeFromFavorites(movie) {
-      favorites = favorites.filter(fav => fav.id !== movie.id);
-      localStorage.setItem('favorites', JSON.stringify(favorites));
-      updateFavoriteMovies();
     }
 
     function openMovieEmbed(movie) {
       const movieIframeContainer = document.getElementById('movieIframeContainer');
       const movieIframe = document.getElementById('movieIframe');
       movieIframe.src = `https://player.smashy.stream/movie/${movie.id}`;
-      movieIframeContainer.style.display = 'flex';
+      movieIframeContainer.style.display = 'flex'; // Show the iframe container
 
       // Add to recently watched
       if (!recentlyWatched.some(watch => watch.id === movie.id)) {
@@ -348,7 +320,7 @@
 
     function closeMovieEmbed() {
       const movieIframeContainer = document.getElementById('movieIframeContainer');
-      movieIframeContainer.style.display = 'none';
+      movieIframeContainer.style.display = 'none'; // Hide the iframe container
     }
 
     function toggleSearchBox() {
@@ -387,7 +359,6 @@
       updateRecentlyWatched();
     });
   </script>
-
 </body>
 
 </html>
