@@ -101,10 +101,9 @@
     .star-icon, .remove-fav-icon, .info-icon {
       position: absolute;
       top: 10px;
-      right: 10px;
+      font-size: 25px;
       color: #ccc;
       cursor: pointer;
-      font-size: 25px;
       transition: color 0.3s ease;
     }
 
@@ -309,13 +308,12 @@
         }
       });
 
-      movieBox.addEventListener("click", function() {
-        addToRecentlyWatched(movie);
-        openMovieIframe(movie.id);
-      });
+      // Positioning the info icon on the left and star icon on the right
+      infoIcon.style.left = '10px';
+      starIcon.style.right = '10px';
 
-      movieBox.appendChild(starIcon); 
       movieBox.appendChild(infoIcon);
+      movieBox.appendChild(starIcon);
       movieBox.appendChild(movieImg);
       movieBox.appendChild(movieTitle);
       movieBox.appendChild(movieYear);
@@ -338,14 +336,22 @@
     }
 
     function addToRecentlyWatched(movie) {
-      if (!recentlyWatched.some(watched => watched.id === movie.id)) {
-        recentlyWatched.unshift(movie); 
-        if (recentlyWatched.length > 10) {
-          recentlyWatched.pop(); 
-        }
-        localStorage.setItem('recentlyWatched', JSON.stringify(recentlyWatched));
-        displayRecentlyWatched();
+      // Check if the movie is already in the recently watched list
+      const movieIndex = recentlyWatched.findIndex(watched => watched.id === movie.id);
+      
+      if (movieIndex !== -1) {
+        recentlyWatched.splice(movieIndex, 1);  // Remove it from the current position
       }
+
+      // Add it to the front of the recently watched list
+      recentlyWatched.unshift(movie);
+
+      if (recentlyWatched.length > 10) {
+        recentlyWatched.pop();  // Keep the list length to 10
+      }
+
+      localStorage.setItem('recentlyWatched', JSON.stringify(recentlyWatched));
+      displayRecentlyWatched();
     }
 
     function openMovieIframe(movieId) {
