@@ -31,25 +31,28 @@
       left: 0;
       right: 0;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      padding: 10px 20px;
-      background-color: #141414;
+      padding: 20px;
+      background-color: rgba(20, 20, 20, 0.8);
       z-index: 1000;
-      border-bottom: 1px solid #ccc;
+      border-bottom: 1px solid #222;
     }
 
-    .navbar img { height: 40px; }
+    .navbar img {
+      height: 40px;
+    }
 
     .navbar .right-icons {
-      margin-left: auto;
       display: flex;
       align-items: center;
     }
 
     .navbar .right-icons i {
-      margin: 0 10px;
+      margin: 0 15px;
       cursor: pointer;
       font-size: 22px;
+      color: white;
     }
 
     /* Search Bar */
@@ -69,84 +72,91 @@
       transition: opacity 0.3s ease;
     }
 
-    /* Movie Row Styles */
+    /* Main Content Container */
+    .main-content {
+      margin-top: 80px;
+    }
+
+    /* Genre Section */
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      margin: 20px 0;
+    }
+
+    /* Movie Row */
     .row {
       display: flex;
       overflow-x: auto;
       padding: 0 20px;
-      margin: 20px 0;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
     }
 
     .row img {
       margin-right: 10px;
-      height: 180px;
-      width: 120px;
+      height: 300px;
+      width: 200px;
       object-fit: cover;
-      cursor: pointer;
+      border-radius: 10px;
+      transition: transform 0.3s ease;
       scroll-snap-align: start;
-      border-radius: 12px;
       opacity: 0.7;
-      transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
-    .row img:hover { transform: scale(1.05); opacity: 1; }
+    .row img:hover {
+      transform: scale(1.1);
+      opacity: 1;
+    }
 
-    /* Movie Box and Icons */
+    /* Movie Box */
     .movie-box {
       position: relative;
+      width: 200px;
+      height: 300px;
       cursor: pointer;
-      pointer-events: none; /* Prevent clicking on the box itself */
+      border-radius: 10px;
+      overflow: hidden;
+      margin-right: 15px;
     }
 
-    .star-icon, .info-icon {
+    .movie-box:hover .movie-overlay {
+      opacity: 1;
+    }
+
+    /* Hover Overlay */
+    .movie-overlay {
       position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 25px;
-      color: #ccc;
-      pointer-events: auto; /* Enable clicking the icons */
-      transition: color 0.3s ease;
-    }
-
-    .star-icon.filled { color: #ffcc00; }
-    .remove-fav-icon { color: #e50914; }
-
-    .movie-name {
-      margin-top: 8px;
-      font-size: 16px;
-      font-weight: 700;
-      text-align: center;
-      color: #fff;
-      word-wrap: break-word;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    }
-
-    .movie-year {
-      font-size: 12px;
-      color: #aaa;
-      text-align: center;
-    }
-
-    .movie-description-bubble {
-      position: absolute;
-      top: -40px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: rgba(0, 0, 0, 0.8);
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 5px;
-      max-width: 200px;
-      font-size: 12px;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
       opacity: 0;
       transition: opacity 0.3s ease;
     }
 
-    .movie-box:hover .movie-description-bubble { opacity: 1; }
+    .movie-box i {
+      color: white;
+      font-size: 30px;
+      margin: 10px;
+    }
 
-    /* Modal Styles */
+    .movie-name {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Modal (Movie Embed) */
     .movie-iframe-container {
       display: none;
       position: fixed;
@@ -176,13 +186,6 @@
       color: white;
       cursor: pointer;
     }
-
-    /* Genre Section */
-    #genres .section-title {
-      font-size: 24px;
-      font-weight: 700;
-      margin: 20px 0;
-    }
   </style>
 </head>
 
@@ -193,7 +196,7 @@
     <img alt="Logo" src="https://i.ibb.co/gjBrfcB/c3f62d75a54648c3fcec0d618c004e66.png" width="120" />
     <div class="right-icons">
       <i class="fas fa-search" onclick="toggleSearchBox()"></i>
-      <i class="fas fa-tv screen-share-icon" onclick="startScreenSharing()" title="Cast This Page"></i>
+      <i class="fas fa-tv" onclick="startScreenSharing()" title="Cast This Page"></i>
       <i class="fas fa-bell" onclick="showNotifications()"></i>
       <i class="fas fa-user" onclick="showUserProfile()"></i>
     </div>
@@ -208,26 +211,23 @@
     <span class="close-iframe" onclick="closeMovieEmbed()">×</span>
   </div>
 
-  <!-- Sections for Movies -->
-  <div class="favorite-movies">
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Favorites Section -->
     <div class="section-title">Favorite Movies</div>
     <div class="row" id="movieRowFavorites"></div>
-  </div>
 
-  <div class="recently-watched">
+    <!-- Recently Watched Section -->
     <div class="section-title">Recently Watched</div>
     <div class="row" id="movieRowRecentlyWatched"></div>
-  </div>
 
-  <div class="search-results" style="display: none;">
+    <!-- Search Results Section -->
     <div class="section-title">Search Results</div>
     <div class="row" id="movieRowSearchResults"></div>
-  </div>
 
-  <div id="genres">
+    <!-- Genres Section (Example for Action) -->
     <div class="section-title">Action Movies</div>
     <div class="row" id="movieRowAction"></div>
-    <!-- Additional genre rows can be added here... -->
   </div>
 
   <script>
@@ -241,25 +241,20 @@
       movieBox.classList.add("movie-box");
 
       const movieImg = document.createElement("img");
-      movieImg.src = "https://image.tmdb.org/t/p/w185" + movie.poster_path;
+      movieImg.src = "https://image.tmdb.org/t/p/w500" + movie.poster_path;
       movieImg.alt = movie.title;
 
       const movieTitle = document.createElement("div");
       movieTitle.classList.add("movie-name");
       movieTitle.innerText = movie.title;
 
-      const movieYear = document.createElement("div");
-      movieYear.classList.add("movie-year");
-      movieYear.innerText = new Date(movie.release_date).getFullYear();
-
-      const movieDescriptionBubble = document.createElement("div");
-      movieDescriptionBubble.classList.add("movie-description-bubble");
-      movieDescriptionBubble.innerText = movie.overview;
+      const movieOverlay = document.createElement("div");
+      movieOverlay.classList.add("movie-overlay");
 
       const starIcon = document.createElement("i");
-      starIcon.classList.add("fas", "fa-star", "star-icon");
+      starIcon.classList.add("fas", "fa-star");
       if (favoriteMovies.some(fav => fav.id === movie.id)) {
-        starIcon.classList.add("filled");
+        starIcon.style.color = "#ffcc00";
       }
       starIcon.onclick = (e) => {
         e.stopPropagation();
@@ -267,18 +262,18 @@
       };
 
       const infoIcon = document.createElement("i");
-      infoIcon.classList.add("fas", "fa-info-circle", "info-icon");
+      infoIcon.classList.add("fas", "fa-info-circle");
       infoIcon.onclick = (e) => {
         e.stopPropagation();
         openMovieEmbed(movie.id);
       };
 
+      movieOverlay.appendChild(starIcon);
+      movieOverlay.appendChild(infoIcon);
+
       movieBox.appendChild(movieImg);
       movieBox.appendChild(movieTitle);
-      movieBox.appendChild(movieYear);
-      movieBox.appendChild(movieDescriptionBubble);
-      movieBox.appendChild(starIcon);
-      movieBox.appendChild(infoIcon);
+      movieBox.appendChild(movieOverlay);
 
       movieBox.onclick = () => openMovieEmbed(movie.id);
 
@@ -303,10 +298,10 @@
       const isFavorite = favoriteMovies.some(fav => fav.id === movie.id);
       if (isFavorite) {
         favoriteMovies = favoriteMovies.filter(fav => fav.id !== movie.id);
-        icon.classList.remove("filled");
+        icon.style.color = "";
       } else {
         favoriteMovies.push(movie);
-        icon.classList.add("filled");
+        icon.style.color = "#ffcc00";
       }
       localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
     }
@@ -332,6 +327,31 @@
       });
     }
 
+    function displayFavoriteMovies() {
+      const row = document.getElementById("movieRowFavorites");
+      row.innerHTML = '';
+      favoriteMovies.forEach(movie => {
+        const movieBox = createMovieBox(movie, true);
+        row.appendChild(movieBox);
+      });
+    }
+
+    // Example for fetching some movie data
+    fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}`)
+      .then(response => response.json())
+      .then(data => {
+        const row = document.getElementById("movieRowAction");
+        data.results.forEach(movie => {
+          const movieBox = createMovieBox(movie);
+          row.appendChild(movieBox);
+        });
+      });
+
+    // Initial Display
+    document.addEventListener('DOMContentLoaded', () => {
+      displayFavoriteMovies();
+    });
+
     function toggleSearchBox() {
       const searchBar = document.getElementById("searchBar");
       searchBar.style.display = searchBar.style.display === 'block' ? 'none' : 'block';
@@ -348,11 +368,6 @@
     function showUserProfile() {
       alert("User profile feature coming soon.");
     }
-
-    // Initialize Page
-    document.addEventListener('DOMContentLoaded', () => {
-      displaySearchResults();
-    });
   </script>
 </body>
 </html>
