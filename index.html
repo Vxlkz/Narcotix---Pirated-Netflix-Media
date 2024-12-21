@@ -181,26 +181,32 @@
       position: relative;
     }
 
-    .movie-description-bubble {
-      position: absolute;
-      top: -40px;
+    .movie-description-popup {
+      display: none;
+      position: fixed;
+      top: 20%;
       left: 50%;
       transform: translateX(-50%);
-      background-color: rgba(0, 0, 0, 0.8);
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 5px;
-      max-width: 200px;
-      font-size: 12px;
-      display: none;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: 1000;
+      width: 80%;
+      background-color: rgba(0, 0, 0, 0.9);
+      padding: 20px;
+      border-radius: 8px;
+      color: white;
+      z-index: 1001;
     }
 
-    .movie-box:hover .movie-description-bubble {
-      display: block;
-      opacity: 1;
+    .movie-description-popup .close-popup {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+    .movie-description-popup .content {
+      max-height: 400px;
+      overflow-y: auto;
+      margin-bottom: 20px;
     }
 
     .genre-container {
@@ -248,12 +254,22 @@
     <!-- Movie genres will be dynamically populated here -->
   </div>
 
+  <div id="movieDescriptionPopup" class="movie-description-popup">
+    <span class="close-popup" onclick="closePopup()">×</span>
+    <div class="content">
+      <h2 id="movieTitlePopup"></h2>
+      <p id="movieOverviewPopup"></p>
+      <h4>Cast</h4>
+      <ul id="movieCastPopup"></ul>
+    </div>
+    <button onclick="playMovie()" class="btn-play">Play</button>
+  </div>
+
   <script>
     const apiKey = 'd4d5dc37aeb71914016166a958fbe3db';
     const baseUrl = 'https://api.themoviedb.org/3';
     let favoriteMovies = JSON.parse(localStorage.getItem('favoriteMovies')) || [];
     let recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [];
-    let searchResults = [];
 
     function createMovieBox(movie, isFavorite = false) {
       const movieBox = document.createElement("div");
@@ -271,19 +287,20 @@
       movieYear.classList.add("movie-year");
       movieYear.innerText = new Date(movie.release_date).getFullYear();
 
-      const movieDescriptionBubble = document.createElement("div");
-      movieDescriptionBubble.classList.add("movie-description-bubble");
-      movieDescriptionBubble.innerText = movie.overview;
+      const infoIcon = document.createElement("i");
+      infoIcon.classList.add("fas", "fa-info-circle", "info-icon");
+      infoIcon.addEventListener("click", function() {
+        showMovieDescription(movie);
+      });
 
       const starIcon = document.createElement("i");
       starIcon.classList.add("fas", "fa-star", "star-icon");
-      if (favoriteMovies.some(fav => fav.id === movie.id)) {
+      if (isFavorite) {
         starIcon.classList.add("filled");
       }
-
       starIcon.addEventListener("click", function(event) {
-        event.stopPropagation(); 
-        if (favoriteMovies.some(fav => fav.id === movie.id)) {
+        event.stopPropagation();
+        if (starIcon.classList.contains("filled")) {
           removeFromFavorites(movie);
           starIcon.classList.remove("filled");
         } else {
@@ -298,10 +315,10 @@
       });
 
       movieBox.appendChild(starIcon); 
+      movieBox.appendChild(infoIcon);
       movieBox.appendChild(movieImg);
       movieBox.appendChild(movieTitle);
       movieBox.appendChild(movieYear);
-      movieBox.appendChild(movieDescriptionBubble);
 
       return movieBox;
     }
@@ -343,6 +360,38 @@
       movieIframeContainer.style.display = 'none';
       const movieIframe = document.getElementById("movieIframe");
       movieIframe.src = '';
+    }
+
+    function showMovieDescription(movie) {
+      const movieDescriptionPopup = document.getElementById('movieDescriptionPopup');
+      document.getElementById('movieTitlePopup').innerText = movie.title;
+      document.getElementById('movieOverviewPopup').innerText = movie.overview;
+
+      fetch(`${baseUrl}/movie/${movie.id}/credits?api_key=${apiKey}`)
+        .then(response => response.json())
+        .then(data => {
+          const castList = document.getElementById('movieCastPopup');
+          castList.innerHTML = '';
+          data.cast.slice(0, 5).forEach(actor => {
+            const li = document.createElement('li');
+            li.innerText = actor.name;
+            castList.appendChild(li);
+          });
+        });
+
+      movieDescriptionPopup.style.display = 'block';
+    }
+
+    function closePopup() {
+      document.getElementById('movieDescriptionPopup').style.display = 'none';
+    }
+
+    function playMovie() {
+      const movieIframeContainer = document.getElementById("movieIframeContainer");
+      const movieIframe = document.getElementById("movieIframe");
+      movieIframe.src = `https://www.youtube.com/embed/${movieId}`;
+      movieIframeContainer.style.display = 'flex';
+      closePopup();
     }
 
     function displayFavoriteMovies() {
@@ -393,7 +442,6 @@
         .catch(error => console.error(error));
     }
 
-    // Fetch genres list from TMDB API
     function fetchGenres() {
       fetch(`${baseUrl}/genre/movie/list?api_key=${apiKey}`)
         .then(response => response.json())
