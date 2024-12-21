@@ -211,6 +211,17 @@
     .genre-container {
       margin-top: 20px;
     }
+
+    .genre-item {
+      display: inline-block;
+      background-color: #333;
+      padding: 8px 12px;
+      margin-right: 10px;
+      margin-top: 10px;
+      border-radius: 20px;
+      color: white;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -249,7 +260,7 @@
     <div class="row" id="movieRowSearchResults"></div>
   </div>
 
-  <div id="genres">
+  <div id="genres" class="genre-container">
     <!-- Movie genres will be dynamically populated here -->
   </div>
 
@@ -269,6 +280,26 @@
     const baseUrl = 'https://api.themoviedb.org/3';
     let favoriteMovies = JSON.parse(localStorage.getItem('favoriteMovies')) || [];
     let recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [];
+
+    // Function to fetch and display genres dynamically
+    function fetchGenres() {
+      fetch(`${baseUrl}/genre/movie/list?api_key=${apiKey}`)
+        .then(response => response.json())
+        .then(data => {
+          const genresContainer = document.getElementById('genres');
+          genresContainer.innerHTML = ''; // Clear existing genres
+          data.genres.forEach(genre => {
+            const genreItem = document.createElement('div');
+            genreItem.classList.add('genre-item');
+            genreItem.innerText = genre.name;
+            genresContainer.appendChild(genreItem);
+          });
+        })
+        .catch(error => console.error('Error fetching genres:', error));
+    }
+
+    // Call fetchGenres on page load
+    fetchGenres();
 
     function createMovieBox(movie, isFavorite = false) {
       const movieBox = document.createElement("div");
