@@ -98,7 +98,7 @@
       opacity: 1;
     }
 
-    .star-icon, .remove-fav-icon {
+    .star-icon, .remove-fav-icon, .info-icon {
       position: absolute;
       top: 10px;
       right: 10px;
@@ -202,9 +202,12 @@
       display: block;
       opacity: 1;
     }
+
+    .genre-container {
+      margin-top: 20px;
+    }
   </style>
 </head>
-
 <body>
 
   <div class="top-space"></div>
@@ -242,38 +245,12 @@
   </div>
 
   <div id="genres">
-    <div class="section-title">Action Movies</div>
-    <div class="row" id="movieRowAction"></div>
-    <div class="section-title">Adventure Movies</div>
-    <div class="row" id="movieRowAdventure"></div>
-    <div class="section-title">Comedy Movies</div>
-    <div class="row" id="movieRowComedy"></div>
-    <div class="section-title">Horror Movies</div>
-    <div class="row" id="movieRowHorror"></div>
-    <div class="section-title">Drama Movies</div>
-    <div class="row" id="movieRowDrama"></div>
-    <div class="section-title">Romance Movies</div>
-    <div class="row" id="movieRowRomance"></div>
-    <div class="section-title">Thriller Movies</div>
-    <div class="row" id="movieRowThriller"></div>
-    <div class="section-title">Sci-Fi Movies</div>
-    <div class="row" id="movieRowSciFi"></div>
-    <div class="section-title">Family Movies</div>
-    <div class="row" id="movieRowFamily"></div>
-    <div class="section-title">Animation Movies</div>
-    <div class="row" id="movieRowAnimation"></div>
-    <div class="section-title">Documentary Movies</div>
-    <div class="row" id="movieRowDocumentary"></div>
-    <div class="section-title">Music Movies</div>
-    <div class="row" id="movieRowMusic"></div>
-    <div class="section-title">War Movies</div>
-    <div class="row" id="movieRowWar"></div>
-    <div class="section-title">History Movies</div>
-    <div class="row" id="movieRowHistory"></div>
+    <!-- Movie genres will be dynamically populated here -->
   </div>
 
   <script>
     const apiKey = 'd4d5dc37aeb71914016166a958fbe3db';
+    const baseUrl = 'https://api.themoviedb.org/3';
     let favoriteMovies = JSON.parse(localStorage.getItem('favoriteMovies')) || [];
     let recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [];
     let searchResults = [];
@@ -354,6 +331,20 @@
       }
     }
 
+    function openMovieIframe(movieId) {
+      const movieIframeContainer = document.getElementById("movieIframeContainer");
+      const movieIframe = document.getElementById("movieIframe");
+      movieIframe.src = `https://www.youtube.com/embed/${movieId}`;
+      movieIframeContainer.style.display = 'flex';
+    }
+
+    function closeMovieEmbed() {
+      const movieIframeContainer = document.getElementById("movieIframeContainer");
+      movieIframeContainer.style.display = 'none';
+      const movieIframe = document.getElementById("movieIframe");
+      movieIframe.src = '';
+    }
+
     function displayFavoriteMovies() {
       const movieRowFavorites = document.getElementById("movieRowFavorites");
       movieRowFavorites.innerHTML = '';
@@ -372,48 +363,52 @@
       });
     }
 
-    function displaySearchResults() {
-      const movieRowSearchResults = document.getElementById("movieRowSearchResults");
-      movieRowSearchResults.innerHTML = '';
-      searchResults.forEach(movie => {
-        const movieBox = createMovieBox(movie);
-        movieRowSearchResults.appendChild(movieBox);
-      });
+    function displayMoviesForGenre(genreId, genreName) {
+      fetch(`${baseUrl}/discover/movie?api_key=${apiKey}&with_genres=${genreId}&page=1`)
+        .then(response => response.json())
+        .then(data => {
+          const movieRow = document.createElement("div");
+          movieRow.classList.add("row");
+          movieRow.id = `movieRow${genreName}`;
+
+          const sectionTitle = document.createElement("div");
+          sectionTitle.classList.add("section-title");
+          sectionTitle.innerText = `${genreName} Movies`;
+
+          const genreContainer = document.createElement("div");
+          genreContainer.classList.add("genre-container");
+          genreContainer.appendChild(sectionTitle);
+          genreContainer.appendChild(movieRow);
+
+          // Add the genre container to the genres section
+          const genresSection = document.getElementById("genres");
+          genresSection.appendChild(genreContainer);
+
+          // Now populate movies for the genre
+          data.results.forEach(movie => {
+            const movieBox = createMovieBox(movie);
+            movieRow.appendChild(movieBox);
+          });
+        })
+        .catch(error => console.error(error));
     }
 
-    function openMovieIframe(movieId) {
-      const iframeContainer = document.getElementById("movieIframeContainer");
-      const iframe = document.getElementById("movieIframe");
-      iframe.src = `https://player.smashy.stream/movie/${movieId}`;
-      iframeContainer.style.display = 'flex';
+    // Fetch genres list from TMDB API
+    function fetchGenres() {
+      fetch(`${baseUrl}/genre/movie/list?api_key=${apiKey}`)
+        .then(response => response.json())
+        .then(data => {
+          data.genres.forEach(genre => {
+            displayMoviesForGenre(genre.id, genre.name);
+          });
+        })
+        .catch(error => console.error('Error fetching genres:', error));
     }
 
-    function closeMovieEmbed() {
-      const iframeContainer = document.getElementById("movieIframeContainer");
-      iframeContainer.style.display = 'none';
-    }
+    // Initialize the page by fetching genres and movies
+    fetchGenres();
 
-    function toggleSearchBox() {
-      const searchBar = document.getElementById('searchBar');
-      searchBar.style.display = searchBar.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function searchMovies() {
-      const query = document.getElementById("searchBar").value;
-      if (query) {
-        fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${query}`)
-          .then(response => response.json())
-          .then(data => {
-            searchResults = data.results;
-            displaySearchResults();
-          })
-          .catch(error => console.error(error));
-        document.querySelector('.search-results').style.display = 'block';
-      } else {
-        document.querySelector('.search-results').style.display = 'none';
-      }
-    }
-
+    // Display favorite and recently watched movies initially
     displayFavoriteMovies();
     displayRecentlyWatched();
   </script>
