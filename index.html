@@ -209,18 +209,27 @@
     }
 
     .genre-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
       margin-top: 20px;
+      padding: 0 20px;
     }
 
     .genre-item {
       display: inline-block;
       background-color: #333;
       padding: 8px 12px;
+      margin-bottom: 10px;
       margin-right: 10px;
-      margin-top: 10px;
       border-radius: 20px;
       color: white;
       cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .genre-item:hover {
+      background-color: #555;
     }
   </style>
 </head>
@@ -282,7 +291,7 @@
     let recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [];
     let searchResults = [];
 
-    // Function to fetch and display genres dynamically
+    // Function to fetch genres dynamically
     function fetchGenres() {
       fetch(`${baseUrl}/genre/movie/list?api_key=${apiKey}`)
         .then(response => response.json())
