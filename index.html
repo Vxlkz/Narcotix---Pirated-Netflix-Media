@@ -213,21 +213,7 @@
 
   <!-- Main Content -->
   <div class="main-content">
-    <!-- Favorites Section -->
-    <div class="section-title">Favorite Movies</div>
-    <div class="row" id="movieRowFavorites"></div>
-
-    <!-- Recently Watched Section -->
-    <div class="section-title">Recently Watched</div>
-    <div class="row" id="movieRowRecentlyWatched"></div>
-
-    <!-- Search Results Section -->
-    <div class="section-title">Search Results</div>
-    <div class="row" id="movieRowSearchResults"></div>
-
-    <!-- Genres Section (Example for Action) -->
-    <div class="section-title">Action Movies</div>
-    <div class="row" id="movieRowAction"></div>
+    <div id="genresContainer"></div>
   </div>
 
   <script>
@@ -236,7 +222,46 @@
     let recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [];
     let searchResults = [];
 
-    function createMovieBox(movie, isFavorite = false) {
+    // Fetch genres
+    function fetchGenres() {
+      fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${apiKey}`)
+        .then(response => response.json())
+        .then(data => {
+          const genres = data.genres;
+          genres.forEach(genre => {
+            fetchMoviesByGenre(genre.id, genre.name);
+          });
+        });
+    }
+
+    // Fetch movies by genre
+    function fetchMoviesByGenre(genreId, genreName) {
+      fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}`)
+        .then(response => response.json())
+        .then(data => {
+          const genreSection = document.createElement('div');
+          genreSection.classList.add('section');
+          
+          const sectionTitle = document.createElement('div');
+          sectionTitle.classList.add('section-title');
+          sectionTitle.innerText = genreName;
+          genreSection.appendChild(sectionTitle);
+
+          const movieRow = document.createElement('div');
+          movieRow.classList.add('row');
+
+          data.results.forEach(movie => {
+            const movieBox = createMovieBox(movie);
+            movieRow.appendChild(movieBox);
+          });
+
+          genreSection.appendChild(movieRow);
+          document.getElementById('genresContainer').appendChild(genreSection);
+        });
+    }
+
+    // Create movie box
+    function createMovieBox(movie) {
       const movieBox = document.createElement("div");
       movieBox.classList.add("movie-box");
 
@@ -253,20 +278,11 @@
 
       const starIcon = document.createElement("i");
       starIcon.classList.add("fas", "fa-star");
-      if (favoriteMovies.some(fav => fav.id === movie.id)) {
-        starIcon.style.color = "#ffcc00";
-      }
-      starIcon.onclick = (e) => {
-        e.stopPropagation();
-        toggleFavorite(movie, starIcon);
-      };
-
+      starIcon.onclick = () => toggleFavorite(movie, starIcon);
+      
       const infoIcon = document.createElement("i");
       infoIcon.classList.add("fas", "fa-info-circle");
-      infoIcon.onclick = (e) => {
-        e.stopPropagation();
-        openMovieEmbed(movie.id);
-      };
+      infoIcon.onclick = () => openMovieEmbed(movie.id);
 
       movieOverlay.appendChild(starIcon);
       movieOverlay.appendChild(infoIcon);
@@ -274,8 +290,6 @@
       movieBox.appendChild(movieImg);
       movieBox.appendChild(movieTitle);
       movieBox.appendChild(movieOverlay);
-
-      movieBox.onclick = () => openMovieEmbed(movie.id);
 
       return movieBox;
     }
@@ -327,47 +341,9 @@
       });
     }
 
-    function displayFavoriteMovies() {
-      const row = document.getElementById("movieRowFavorites");
-      row.innerHTML = '';
-      favoriteMovies.forEach(movie => {
-        const movieBox = createMovieBox(movie, true);
-        row.appendChild(movieBox);
-      });
-    }
-
-    // Example for fetching some movie data
-    fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}`)
-      .then(response => response.json())
-      .then(data => {
-        const row = document.getElementById("movieRowAction");
-        data.results.forEach(movie => {
-          const movieBox = createMovieBox(movie);
-          row.appendChild(movieBox);
-        });
-      });
-
-    // Initial Display
-    document.addEventListener('DOMContentLoaded', () => {
-      displayFavoriteMovies();
-    });
-
-    function toggleSearchBox() {
-      const searchBar = document.getElementById("searchBar");
-      searchBar.style.display = searchBar.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function startScreenSharing() {
-      alert("Screen sharing functionality will be implemented.");
-    }
-
-    function showNotifications() {
-      alert("Notifications will be displayed here.");
-    }
-
-    function showUserProfile() {
-      alert("User profile feature coming soon.");
-    }
+    // Fetch genres and movies on load
+    document.addEventListener('DOMContentLoaded', fetchGenres);
   </script>
+
 </body>
 </html>
