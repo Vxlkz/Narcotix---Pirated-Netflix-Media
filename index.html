@@ -71,6 +71,12 @@
       height: 50px;
     }
 
+    .section-title {
+      margin: 20px 20px 10px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
     .row {
       display: flex;
       overflow-x: auto;
@@ -98,30 +104,6 @@
       opacity: 1;
     }
 
-    .star-icon, .remove-fav-icon {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      color: #ccc;
-      cursor: pointer;
-      font-size: 25px;
-      transition: color 0.3s ease;
-    }
-
-    .star-icon.filled, .remove-fav-icon {
-      color: #ffcc00;
-    }
-
-    .remove-fav-icon {
-      color: #e50914;
-    }
-
-    .section-title {
-      margin: 20px 20px 10px;
-      font-size: 24px;
-      font-weight: 700;
-    }
-
     .movie-name {
       margin-top: 8px;
       font-size: 16px;
@@ -136,16 +118,6 @@
       font-size: 12px;
       color: #aaa;
       text-align: center;
-    }
-
-    .favorite-movies, .recently-watched, .search-results {
-      margin-top: 20px;
-    }
-
-    .recently-watched .row img,
-    .favorite-movies .row img {
-      height: 250px;
-      width: 180px;
     }
 
     .movie-iframe-container {
@@ -181,6 +153,7 @@
       position: relative;
     }
 
+    /* Movie Description Bubble (Info Icon) */
     .movie-description-bubble {
       position: absolute;
       top: -40px;
@@ -202,6 +175,35 @@
       display: block;
       opacity: 1;
     }
+
+    .info-icon {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 25px;
+      color: #ccc;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .info-icon:hover {
+      color: #fff;
+    }
+
+    .star-icon {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: #ccc;
+      cursor: pointer;
+      font-size: 25px;
+      transition: color 0.3s ease;
+    }
+
+    .star-icon.filled {
+      color: #ffcc00;
+    }
+
   </style>
 </head>
 
@@ -278,7 +280,25 @@
     let recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [];
     let searchResults = [];
 
-    function createMovieBox(movie, isFavorite = false) {
+    const genreIds = {
+      Action: 28,
+      Adventure: 12,
+      Comedy: 35,
+      Horror: 27,
+      Drama: 18,
+      Romance: 10749,
+      Thriller: 53,
+      'Sci-Fi': 878,
+      Family: 10751,
+      Animation: 16,
+      Documentary: 99,
+      Music: 10402,
+      War: 10752,
+      History: 36
+    };
+
+    // Create movie box with info icon and description
+    function createMovieBox(movie) {
       const movieBox = document.createElement("div");
       movieBox.classList.add("movie-box");
 
@@ -298,6 +318,17 @@
       movieDescriptionBubble.classList.add("movie-description-bubble");
       movieDescriptionBubble.innerText = movie.overview;
 
+      const infoIcon = document.createElement("i");
+      infoIcon.classList.add("fas", "fa-info-circle", "info-icon");
+      infoIcon.addEventListener("mouseover", () => {
+        movieDescriptionBubble.style.display = 'block';
+        movieDescriptionBubble.style.opacity = 1;
+      });
+      infoIcon.addEventListener("mouseout", () => {
+        movieDescriptionBubble.style.display = 'none';
+        movieDescriptionBubble.style.opacity = 0;
+      });
+
       const starIcon = document.createElement("i");
       starIcon.classList.add("fas", "fa-star", "star-icon");
       if (favoriteMovies.some(fav => fav.id === movie.id)) {
@@ -315,16 +346,17 @@
         }
       });
 
-      movieBox.addEventListener("click", function() {
-        addToRecentlyWatched(movie);
-        openMovieIframe(movie.id);
-      });
-
-      movieBox.appendChild(starIcon); 
+      movieBox.appendChild(infoIcon);
       movieBox.appendChild(movieImg);
       movieBox.appendChild(movieTitle);
       movieBox.appendChild(movieYear);
       movieBox.appendChild(movieDescriptionBubble);
+      movieBox.appendChild(starIcon);
+
+      movieBox.addEventListener("click", function() {
+        addToRecentlyWatched(movie);
+        openMovieIframe(movie.id);
+      });
 
       return movieBox;
     }
@@ -358,7 +390,7 @@
       const movieRowFavorites = document.getElementById("movieRowFavorites");
       movieRowFavorites.innerHTML = '';
       favoriteMovies.forEach(movie => {
-        const movieBox = createMovieBox(movie, true);
+        const movieBox = createMovieBox(movie);
         movieRowFavorites.appendChild(movieBox);
       });
     }
@@ -414,8 +446,30 @@
       }
     }
 
+    // Fetch movies by genre
+    function fetchMoviesByGenre(genreId, genreName) {
+      fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}`)
+        .then(response => response.json())
+        .then(data => {
+          const movieRow = document.getElementById(`movieRow${genreName}`);
+          movieRow.innerHTML = '';
+          data.results.forEach(movie => {
+            const movieBox = createMovieBox(movie);
+            movieRow.appendChild(movieBox);
+          });
+        })
+        .catch(error => console.error(error));
+    }
+
+    // Call fetchMoviesByGenre for all genres
+    Object.entries(genreIds).forEach(([genreName, genreId]) => {
+      fetchMoviesByGenre(genreId, genreName);
+    });
+
+    // Initialize favorite and recently watched movies
     displayFavoriteMovies();
     displayRecentlyWatched();
+
   </script>
 
 </body>
