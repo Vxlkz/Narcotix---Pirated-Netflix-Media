@@ -77,17 +77,13 @@
       color: #fff;
       padding: 20px;
       border-radius: 10px;
-      max-width: 600px;
-      width: 80%;
+      max-width: 800px;
+      width: 90%;
       display: none;
       z-index: 1001;
-      text-align: center;
+      text-align: left;
       overflow-y: auto;
       max-height: 80%;
-    }
-
-    .movie-info-modal h2 {
-      margin-bottom: 15px;
     }
 
     .movie-info-modal .close-modal {
@@ -99,20 +95,24 @@
       cursor: pointer;
     }
 
-    .movie-info-modal .background-image {
+    /* Banner Style */
+    .movie-info-modal .banner-image {
       width: 100%;
+      height: 300px;
+      object-fit: cover;
       border-radius: 10px;
-      margin-bottom: 20px;
     }
 
+    /* Content Style */
     .movie-info-modal .content {
-      text-align: left;
+      padding: 20px 0;
     }
 
     .movie-info-modal .title {
       font-size: 3em;
       font-weight: bold;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      margin: 20px 0;
     }
 
     .movie-info-modal .description {
@@ -178,39 +178,29 @@
   <!-- Movie Info Modal -->
   <div id="movieInfoModal" class="movie-info-modal">
     <span class="close-modal" onclick="closeMovieInfo()">×</span>
-    <div class="container">
-      <img id="movieBackdrop" alt="Movie background" class="background-image" />
-      <div class="content">
-        <div id="movieTitle" class="title"></div>
-        <div class="info" id="movieInfo">
-          <i class="fas fa-thumbs-up"></i><span id="movieYear"></span>
-          <i class="fas fa-clock"></i><span id="movieRuntime"></span>
-          <i class="fas fa-assistive-listening-systems"></i>
-          <i class="fas fa-comment"></i><span id="movieRating"></span>
-        </div>
-        <div id="movieDescription" class="description"></div>
-        <div id="movieCast" class="cast"></div>
-        <div id="movieDirector" class="director"></div>
-        <div id="movieGenre" class="genre"></div>
-        <div class="actions">
-          <i class="fas fa-thumbs-down"></i>
-          <i class="fas fa-thumbs-up"></i>
-          <i class="fas fa-thumbs-up"></i>
-        </div>
-        <button id="resumeButton" class="button">
-          <i class="fas fa-play"></i> Resume playing
-        </button>
-        <button id="playFromStartButton" class="button">
-          <i class="fas fa-undo"></i> Play from beginning
-        </button>
-        <button id="removeButton" class="button remove-button">
-          <span><i class="fas fa-times"></i> Remove from Continue Watching</span>
-          <i class="fas fa-arrow-right"></i>
-        </button>
-        <button id="addToListButton" class="button">
-          <i class="fas fa-plus"></i> Add to My List
-        </button>
+    <div class="content">
+      <img id="movieBanner" class="banner-image" alt="Movie Banner"/>
+      <div id="movieTitle" class="title"></div>
+      <div id="movieDescription" class="description"></div>
+      <div id="movieInfo" class="info">
+        <i class="fas fa-thumbs-up"></i><span id="movieYear"></span>
+        <i class="fas fa-clock"></i><span id="movieRuntime"></span>
+        <i class="fas fa-assistive-listening-systems"></i>
+        <i class="fas fa-comment"></i><span id="movieRating"></span>
       </div>
+      <button id="resumeButton" class="button">
+        <i class="fas fa-play"></i> Resume playing
+      </button>
+      <button id="playFromStartButton" class="button">
+        <i class="fas fa-undo"></i> Play from beginning
+      </button>
+      <button id="removeButton" class="button remove-button">
+        <span><i class="fas fa-times"></i> Remove from Continue Watching</span>
+        <i class="fas fa-arrow-right"></i>
+      </button>
+      <button id="addToListButton" class="button">
+        <i class="fas fa-plus"></i> Add to My List
+      </button>
     </div>
   </div>
 
@@ -219,7 +209,22 @@
     let favoriteMovies = JSON.parse(localStorage.getItem('favoriteMovies')) || [];
     let recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [];
 
-    // Creates a box for each movie
+    // Fetch movie genres from API
+    function fetchGenres() {
+      fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${apiKey}&language=en-US`)
+        .then(response => response.json())
+        .then(data => {
+          const genres = data.genres;
+          genres.forEach(genre => {
+            const genreButton = document.createElement("button");
+            genreButton.textContent = genre.name;
+            genreButton.classList.add("genre-button");
+            document.body.appendChild(genreButton);
+          });
+        });
+    }
+
+    // Create movie box (poster + title)
     function createMovieBox(movie) {
       const movieBox = document.createElement("div");
       movieBox.classList.add("movie-box");
@@ -237,19 +242,27 @@
       return movieBox;
     }
 
-    // Open movie modal
+    // Open movie info modal
     function openMovieInfoModal(movie) {
       const modal = document.getElementById("movieInfoModal");
 
+      // Set Movie Banner and Info
+      document.getElementById("movieBanner").src = "https://image.tmdb.org/t/p/original" + movie.backdrop_path;
       document.getElementById("movieTitle").innerText = movie.title;
       document.getElementById("movieYear").innerText = new Date(movie.release_date).getFullYear();
       document.getElementById("movieRuntime").innerText = `${movie.runtime} mins`;
-      document.getElementById("movieRating").innerText = movie.age_rating || "U/A 13+";
+      document.getElementById("movieRating").innerText = movie.age_rating || "N/A";
       document.getElementById("movieDescription").innerText = movie.overview || "No description available.";
-      document.getElementById("movieCast").innerText = `Cast: ${movie.cast || "N/A"}`;
-      document.getElementById("movieDirector").innerText = `Director: ${movie.director || "N/A"}`;
-      document.getElementById("movieGenre").innerText = `Genre: ${movie.genre || "N/A"}`;
-      document.getElementById("movieBackdrop").src = "https://image.tmdb.org/t/p/w500" + movie.backdrop_path;
+      
+      // Add genres and other info dynamically
+      const genreList = movie.genres.map(genre => genre.name).join(", ");
+      document.getElementById("movieInfo").innerHTML = `
+        <i class="fas fa-thumbs-up"></i><span>${movie.release_date}</span>
+        <i class="fas fa-clock"></i><span>${movie.runtime} mins</span>
+        <i class="fas fa-assistive-listening-systems"></i><span>${movie.language}</span>
+        <i class="fas fa-comment"></i><span>${movie.age_rating || "N/A"}</span>
+        <div><strong>Genres:</strong> ${genreList}</div>
+      `;
 
       const addToListButton = document.getElementById("addToListButton");
       addToListButton.onclick = function() {
@@ -257,65 +270,37 @@
           addToFavorites(movie);
           addToListButton.innerHTML = '<i class="fas fa-check"></i> Added to My List';
         } else {
-          alert("This movie is already in your list.");
+          alert("This movie is already in your list!");
         }
-      };
-
-      const removeFromContinueButton = document.getElementById("removeButton");
-      removeFromContinueButton.onclick = function() {
-        removeFromContinueWatching(movie);
       };
 
       modal.style.display = "block";
     }
 
-    // Close the movie modal
+    // Close modal
     function closeMovieInfo() {
       document.getElementById("movieInfoModal").style.display = "none";
     }
 
-    // Add to favorites (My List)
+    // Add to favorites
     function addToFavorites(movie) {
       favoriteMovies.push(movie);
       localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
-      alert(`${movie.title} added to My List`);
     }
 
-    // Remove movie from continue watching
-    function removeFromContinueWatching(movie) {
-      recentlyWatched = recentlyWatched.filter(watched => watched.id !== movie.id);
-      localStorage.setItem('recentlyWatched', JSON.stringify(recentlyWatched));
-      alert(`${movie.title} removed from Continue Watching`);
-    }
+    // Initialize recently watched section
+    function initializeRecentlyWatched() {
+      const movieRow = document.getElementById("movieRowRecentlyWatched");
 
-    // Display Recently Watched Movies
-    function displayRecentlyWatched() {
-      const movieRowRecentlyWatched = document.getElementById("movieRowRecentlyWatched");
-      movieRowRecentlyWatched.innerHTML = "";
       recentlyWatched.forEach(movie => {
         const movieBox = createMovieBox(movie);
-        movieRowRecentlyWatched.appendChild(movieBox);
+        movieRow.appendChild(movieBox);
       });
     }
 
-    // Fetch movies from TMDb API
-    function fetchMovies() {
-      fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}`)
-        .then(response => response.json())
-        .then(data => {
-          const movieRowRecentlyWatched = document.getElementById("movieRowRecentlyWatched");
-          movieRowRecentlyWatched.innerHTML = '';
-          data.results.forEach(movie => {
-            const movieBox = createMovieBox(movie);
-            movieRowRecentlyWatched.appendChild(movieBox);
-          });
-        })
-        .catch(error => console.error('Error fetching movies:', error));
-    }
-
-    // Initialize Recently Watched and Fetch Movies
-    displayRecentlyWatched();
-    fetchMovies();
+    // Initialize all genres and movies
+    fetchGenres();
+    initializeRecentlyWatched();
   </script>
 
 </body>
