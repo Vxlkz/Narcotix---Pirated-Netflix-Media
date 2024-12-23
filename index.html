@@ -5,156 +5,69 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Narcotix | Pirated Netflix</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   <style>
-    /* General styles (unchanged) */
-    * {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-
-    *::-webkit-scrollbar {
-      display: none;
-    }
-
     body {
       margin: 0;
-      font-family: 'Roboto', sans-serif;
-      background-color: #141414;
-      color: #fff;
-      padding-top: 60px;
-    }
-
-    .navbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      display: flex;
-      align-items: center;
-      padding: 10px 20px;
-      background-color: #141414;
-      z-index: 1000;
-      border-bottom: 1px solid #ccc;
-    }
-
-    .navbar img {
-      height: 40px;
-    }
-
-    .navbar .right-icons {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-    }
-
-    .navbar .right-icons i {
-      margin: 0 10px;
-      cursor: pointer;
-    }
-
-    #searchBar {
-      position: fixed;
-      top: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: none;
-      background-color: #333;
-      border: none;
-      padding: 10px;
-      color: #fff;
-      font-size: 16px;
-      width: 300px;
-      border-radius: 25px;
+      font-family: Arial, sans-serif;
+      color: white;
+      background-color: black;
     }
 
     .top-space {
       height: 50px;
     }
 
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      background-color: #111;
+      align-items: center;
+    }
+
+    .navbar img {
+      width: 120px;
+    }
+
+    .right-icons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .right-icons i {
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .recently-watched {
+      margin-top: 50px;
+      padding: 20px;
+    }
+
     .section-title {
-      margin: 20px 20px 10px;
-      font-size: 24px;
-      font-weight: 700;
+      font-size: 2rem;
+      font-weight: bold;
     }
 
     .row {
       display: flex;
-      overflow-x: auto;
-      padding: 0 20px;
-      margin: 20px 0;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      transition: all 0.3s ease-in-out;
-    }
-
-    .row img {
-      margin-right: 10px;
-      height: 180px;
-      width: 120px;
-      object-fit: cover;
-      cursor: pointer;
-      scroll-snap-align: start;
-      border-radius: 12px;
-      opacity: 0.7;
-      transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-
-    .row img:hover {
-      transform: scale(1.05);
-      opacity: 1;
-    }
-
-    .movie-name {
-      margin-top: 8px;
-      font-size: 16px;
-      font-weight: 700;
-      text-align: center;
-      color: #fff;
-      word-wrap: break-word;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    }
-
-    .movie-year {
-      font-size: 12px;
-      color: #aaa;
-      text-align: center;
-    }
-
-    .movie-iframe-container {
-      display: none;
-      position: fixed;
-      top: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 80%;
-      height: 80%;
-      background-color: rgba(0, 0, 0, 0.8);
-      z-index: 999;
-      justify-content: center;
-      align-items: center;
-    }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    .close-iframe {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 30px;
-      color: white;
-      cursor: pointer;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .movie-box {
       position: relative;
+      width: 200px;
+      cursor: pointer;
     }
 
-    /* Modal (Popup) style for movie description */
+    .movie-box img {
+      width: 100%;
+      border-radius: 5px;
+    }
+
+    /* Modal Styles */
     .movie-info-modal {
       position: fixed;
       top: 50%;
@@ -164,23 +77,16 @@
       color: #fff;
       padding: 20px;
       border-radius: 10px;
-      max-width: 600px;
-      width: 80%;
+      max-width: 800px;
+      width: 90%;
       display: none;
       z-index: 1001;
-      text-align: center;
+      text-align: left;
+      overflow-y: auto;
+      max-height: 80%;
     }
 
-    .movie-info-modal h2 {
-      margin-bottom: 15px;
-    }
-
-    .movie-info-modal p {
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .close-modal {
+    .movie-info-modal .close-modal {
       position: absolute;
       top: 10px;
       right: 10px;
@@ -189,72 +95,136 @@
       cursor: pointer;
     }
 
-    .star-icon {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      color: #ccc;
-      cursor: pointer;
-      font-size: 25px;
-      transition: color 0.3s ease;
+    /* Banner Style */
+    .movie-info-modal .banner-image {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 10px;
     }
 
-    .star-icon.filled {
-      color: #ffcc00;
+    /* Content Style */
+    .movie-info-modal .content {
+      padding: 20px 0;
+    }
+
+    .movie-info-modal .title {
+      font-size: 3em;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      margin: 20px 0;
+    }
+
+    .movie-info-modal .description {
+      margin-top: 10px;
+      font-size: 1.2em;
+    }
+
+    .movie-info-modal .info {
+      margin-top: 10px;
+      font-size: 1em;
+    }
+
+    .movie-info-modal .info i {
+      margin-right: 5px;
+    }
+
+    .movie-info-modal .button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #333;
+      color: white;
+      text-align: left;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.2em;
+      cursor: pointer;
+    }
+
+    .movie-info-modal .button i {
+      margin-right: 10px;
+    }
+
+    .remove-button {
+      background-color: white;
+      color: black;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .remove-button i {
+      color: black;
     }
   </style>
 </head>
-
 <body>
 
+  <!-- Navbar -->
   <div class="top-space"></div>
-
   <div class="navbar">
     <img alt="Logo" src="https://i.ibb.co/gjBrfcB/c3f62d75a54648c3fcec0d618c004e66.png" width="120" />
     <div class="right-icons">
       <i class="fas fa-search" onclick="toggleSearchBox()"></i>
-      <i class="fas fa-tv screen-share-icon" onclick="startScreenSharing()" title="Cast This Page"></i>
-      <i class="fas fa-bell" onclick="showNotifications()"></i>
-      <i class="fas fa-user" onclick="showUserProfile()"></i>
     </div>
   </div>
 
-  <input type="text" id="searchBar" placeholder="Search for movies..." oninput="searchMovies()" />
-
-  <div id="movieIframeContainer" class="movie-iframe-container">
-    <iframe id="movieIframe" src="" allowfullscreen></iframe>
-    <span class="close-iframe" onclick="closeMovieEmbed()">×</span>
-  </div>
-
-  <!-- Modal to display movie info (description) -->
-  <div id="movieInfoModal" class="movie-info-modal">
-    <span class="close-modal" onclick="closeMovieInfo()">×</span>
-    <h2 id="movieInfoTitle"></h2>
-    <p id="movieInfoDescription"></p>
-  </div>
-
-  <div class="favorite-movies">
-    <div class="section-title">Favorite Movies</div>
-    <div class="row" id="movieRowFavorites"></div>
-  </div>
-
+  <!-- Recently Watched Section -->
   <div class="recently-watched">
     <div class="section-title">Recently Watched</div>
     <div class="row" id="movieRowRecentlyWatched"></div>
   </div>
 
-  <div class="search-results" style="display: none;">
-    <div class="section-title">Search Results</div>
-    <div class="row" id="movieRowSearchResults"></div>
+  <!-- Movie Info Modal -->
+  <div id="movieInfoModal" class="movie-info-modal">
+    <span class="close-modal" onclick="closeMovieInfo()">×</span>
+    <div class="content">
+      <img id="movieBanner" class="banner-image" alt="Movie Banner"/>
+      <div id="movieTitle" class="title"></div>
+      <div id="movieDescription" class="description"></div>
+      <div id="movieInfo" class="info">
+        <i class="fas fa-thumbs-up"></i><span id="movieYear"></span>
+        <i class="fas fa-clock"></i><span id="movieRuntime"></span>
+        <i class="fas fa-assistive-listening-systems"></i>
+        <i class="fas fa-comment"></i><span id="movieRating"></span>
+      </div>
+      <button id="resumeButton" class="button">
+        <i class="fas fa-play"></i> Resume playing
+      </button>
+      <button id="playFromStartButton" class="button">
+        <i class="fas fa-undo"></i> Play from beginning
+      </button>
+      <button id="removeButton" class="button remove-button">
+        <span><i class="fas fa-times"></i> Remove from Continue Watching</span>
+        <i class="fas fa-arrow-right"></i>
+      </button>
+      <button id="addToListButton" class="button">
+        <i class="fas fa-plus"></i> Add to My List
+      </button>
+    </div>
   </div>
 
   <script>
     const apiKey = 'd4d5dc37aeb71914016166a958fbe3db';
     let favoriteMovies = JSON.parse(localStorage.getItem('favoriteMovies')) || [];
     let recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [];
-    let searchResults = [];
 
-    // Create movie box with info icon and description
+    // Fetch movie genres from API
+    function fetchGenres() {
+      fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${apiKey}&language=en-US`)
+        .then(response => response.json())
+        .then(data => {
+          const genres = data.genres;
+          genres.forEach(genre => {
+            const genreButton = document.createElement("button");
+            genreButton.textContent = genre.name;
+            genreButton.classList.add("genre-button");
+            document.body.appendChild(genreButton);
+          });
+        });
+    }
+
+    // Create movie box (poster + title)
     function createMovieBox(movie) {
       const movieBox = document.createElement("div");
       movieBox.classList.add("movie-box");
@@ -263,25 +233,11 @@
       movieImg.src = "https://image.tmdb.org/t/p/w185" + movie.poster_path;
       movieImg.alt = movie.title;
 
-      const movieTitle = document.createElement("div");
-      movieTitle.classList.add("movie-name");
-      movieTitle.innerText = movie.title;
-
-      const movieYear = document.createElement("div");
-      movieYear.classList.add("movie-year");
-      movieYear.innerText = movie.release_date.split("-")[0];
-
-      // Create info icon
-      const infoIcon = document.createElement("i");
-      infoIcon.classList.add("fas", "fa-info-circle", "movie-info-icon");
-      infoIcon.onclick = function () {
-        openMovieInfoModal(movie); // Open modal with movie details
-      };
-
       movieBox.appendChild(movieImg);
-      movieBox.appendChild(movieTitle);
-      movieBox.appendChild(movieYear);
-      movieBox.appendChild(infoIcon);
+
+      movieBox.addEventListener("click", function() {
+        openMovieInfoModal(movie);
+      });
 
       return movieBox;
     }
@@ -289,73 +245,63 @@
     // Open movie info modal
     function openMovieInfoModal(movie) {
       const modal = document.getElementById("movieInfoModal");
-      document.getElementById("movieInfoTitle").innerText = movie.title;
-      document.getElementById("movieInfoDescription").innerText = movie.overview;
+
+      // Set Movie Banner and Info
+      document.getElementById("movieBanner").src = "https://image.tmdb.org/t/p/original" + movie.backdrop_path;
+      document.getElementById("movieTitle").innerText = movie.title;
+      document.getElementById("movieYear").innerText = new Date(movie.release_date).getFullYear();
+      document.getElementById("movieRuntime").innerText = `${movie.runtime} mins`;
+      document.getElementById("movieRating").innerText = movie.age_rating || "N/A";
+      document.getElementById("movieDescription").innerText = movie.overview || "No description available.";
+      
+      // Add genres and other info dynamically
+      const genreList = movie.genres.map(genre => genre.name).join(", ");
+      document.getElementById("movieInfo").innerHTML = `
+        <i class="fas fa-thumbs-up"></i><span>${movie.release_date}</span>
+        <i class="fas fa-clock"></i><span>${movie.runtime} mins</span>
+        <i class="fas fa-assistive-listening-systems"></i><span>${movie.language}</span>
+        <i class="fas fa-comment"></i><span>${movie.age_rating || "N/A"}</span>
+        <div><strong>Genres:</strong> ${genreList}</div>
+      `;
+
+      const addToListButton = document.getElementById("addToListButton");
+      addToListButton.onclick = function() {
+        if (!favoriteMovies.some(fav => fav.id === movie.id)) {
+          addToFavorites(movie);
+          addToListButton.innerHTML = '<i class="fas fa-check"></i> Added to My List';
+        } else {
+          alert("This movie is already in your list!");
+        }
+      };
+
       modal.style.display = "block";
     }
 
-    // Close movie info modal
+    // Close modal
     function closeMovieInfo() {
-      const modal = document.getElementById("movieInfoModal");
-      modal.style.display = "none";
+      document.getElementById("movieInfoModal").style.display = "none";
     }
 
-    // Other code for creating movie sections and handling user interactions (search, favorite, etc.)
-    function fetchMovies(sectionId, movieList) {
-      const row = document.getElementById(sectionId);
-      row.innerHTML = ""; // Clear existing content
+    // Add to favorites
+    function addToFavorites(movie) {
+      favoriteMovies.push(movie);
+      localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
+    }
 
-      movieList.forEach(movie => {
+    // Initialize recently watched section
+    function initializeRecentlyWatched() {
+      const movieRow = document.getElementById("movieRowRecentlyWatched");
+
+      recentlyWatched.forEach(movie => {
         const movieBox = createMovieBox(movie);
-        row.appendChild(movieBox);
+        movieRow.appendChild(movieBox);
       });
     }
 
-    // Fetch movie data from API
-    function fetchFavoriteMovies() {
-      fetch('https://api.themoviedb.org/3/movie/popular?api_key=' + apiKey)
-        .then(response => response.json())
-        .then(data => {
-          favoriteMovies = data.results;
-          localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
-          fetchMovies('movieRowFavorites', favoriteMovies);
-        });
-    }
-
-    // Fetch movie data for Recently Watched (you can use a similar API request or custom data)
-    function fetchRecentlyWatched() {
-      fetch('https://api.themoviedb.org/3/movie/popular?api_key=' + apiKey)
-        .then(response => response.json())
-        .then(data => {
-          recentlyWatched = data.results;
-          localStorage.setItem('recentlyWatched', JSON.stringify(recentlyWatched));
-          fetchMovies('movieRowRecentlyWatched', recentlyWatched);
-        });
-    }
-
-    fetchFavoriteMovies();
-    fetchRecentlyWatched();
-
-    // Search functionality
-    function searchMovies() {
-      const query = document.getElementById("searchBar").value;
-      if (query.length > 2) {
-        fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${query}`)
-          .then(response => response.json())
-          .then(data => {
-            searchResults = data.results;
-            document.querySelector(".search-results").style.display = 'block';
-            fetchMovies('movieRowSearchResults', searchResults);
-          });
-      } else {
-        document.querySelector(".search-results").style.display = 'none';
-      }
-    }
-
-    function toggleSearchBox() {
-      const searchBox = document.getElementById('searchBar');
-      searchBox.style.display = searchBox.style.display === 'none' ? 'block' : 'none';
-    }
+    // Initialize all genres and movies
+    fetchGenres();
+    initializeRecentlyWatched();
   </script>
+
 </body>
 </html>
