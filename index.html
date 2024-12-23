@@ -12,10 +12,6 @@
       color: white;
       background-color: black;
     }
-    
-    .top-space {
-      height: 50px;
-    }
 
     .navbar {
       display: flex;
@@ -40,7 +36,7 @@
       cursor: pointer;
     }
 
-    .recently-watched {
+    .recently-watched, .popular-movies, .top-rated-movies {
       margin-top: 50px;
       padding: 20px;
     }
@@ -54,6 +50,8 @@
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
+      overflow-x: auto;
+      padding: 10px 0;
     }
 
     .movie-box {
@@ -65,6 +63,12 @@
     .movie-box img {
       width: 100%;
       border-radius: 5px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    .movie-box:hover img {
+      transform: scale(1.05);
+      transition: 0.3s;
     }
 
     /* Modal Styles */
@@ -157,7 +161,7 @@
       color: black;
     }
 
-    /* Movie Row & Genre Styles */
+    /* Genre & Add to List Button Styles */
     .genre-button {
       background-color: #111;
       color: white;
@@ -176,7 +180,6 @@
 <body>
 
   <!-- Navbar -->
-  <div class="top-space"></div>
   <div class="navbar">
     <img alt="Logo" src="https://i.ibb.co/gjBrfcB/c3f62d75a54648c3fcec0d618c004e66.png" width="120" />
     <div class="right-icons">
@@ -188,6 +191,18 @@
   <div class="recently-watched">
     <div class="section-title">Recently Watched</div>
     <div class="row" id="movieRowRecentlyWatched"></div>
+  </div>
+
+  <!-- Popular Movies Section -->
+  <div class="popular-movies">
+    <div class="section-title">Popular Movies</div>
+    <div class="row" id="movieRowPopular"></div>
+  </div>
+
+  <!-- Top Rated Movies Section -->
+  <div class="top-rated-movies">
+    <div class="section-title">Top Rated Movies</div>
+    <div class="row" id="movieRowTopRated"></div>
   </div>
 
   <!-- Movie Info Modal -->
@@ -223,18 +238,30 @@
     const apiKey = 'd4d5dc37aeb71914016166a958fbe3db';
     let favoriteMovies = JSON.parse(localStorage.getItem('favoriteMovies')) || [];
     let recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [];
+    let popularMovies = [];
+    let topRatedMovies = [];
 
-    // Fetch movie genres from API
-    function fetchGenres() {
-      fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${apiKey}&language=en-US`)
+    // Fetch movies from TMDb API
+    function fetchMovies() {
+      // Fetch popular movies
+      fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=en-US`)
         .then(response => response.json())
         .then(data => {
-          const genres = data.genres;
-          genres.forEach(genre => {
-            const genreButton = document.createElement("button");
-            genreButton.textContent = genre.name;
-            genreButton.classList.add("genre-button");
-            document.body.appendChild(genreButton);
+          popularMovies = data.results;
+          popularMovies.forEach(movie => {
+            const movieBox = createMovieBox(movie);
+            document.getElementById("movieRowPopular").appendChild(movieBox);
+          });
+        });
+
+      // Fetch top-rated movies
+      fetch(`https://api.themoviedb.org/3/movie/top_rated?api_key=${apiKey}&language=en-US`)
+        .then(response => response.json())
+        .then(data => {
+          topRatedMovies = data.results;
+          topRatedMovies.forEach(movie => {
+            const movieBox = createMovieBox(movie);
+            document.getElementById("movieRowTopRated").appendChild(movieBox);
           });
         });
     }
@@ -257,26 +284,26 @@
       return movieBox;
     }
 
-    // Open movie info modal
+    // Open Movie Info Modal
     function openMovieInfoModal(movie) {
       const modal = document.getElementById("movieInfoModal");
+      const genreList = movie.genre_ids.map(genreId => `<button class="genre-button">${genreId}</button>`).join('');
+      const movieGenres = movie.genres ? movie.genres.map(genre => genre.name).join(', ') : 'N/A';
 
-      // Set Movie Banner and Info
+      // Set banner and content
       document.getElementById("movieBanner").src = "https://image.tmdb.org/t/p/original" + movie.backdrop_path;
-      document.getElementById("movieTitle").innerText = movie.title;
-      document.getElementById("movieYear").innerText = new Date(movie.release_date).getFullYear();
-      document.getElementById("movieRuntime").innerText = `${movie.runtime} mins`;
-      document.getElementById("movieRating").innerText = movie.age_rating || "N/A";
-      document.getElementById("movieDescription").innerText = movie.overview || "No description available.";
-      
-      // Add genres and other info dynamically
-      const genreList = movie.genres.map(genre => genre.name).join(", ");
+      document.getElementById("movieTitle").textContent = movie.title;
+      document.getElementById("movieDescription").textContent = movie.overview;
+      document.getElementById("movieYear").textContent = new Date(movie.release_date).getFullYear();
+      document.getElementById("movieRuntime").textContent = movie.runtime ? movie.runtime + " mins" : 'N/A';
+      document.getElementById("movieRating").textContent = movie.vote_average || 'N/A';
+
       document.getElementById("movieInfo").innerHTML = `
         <i class="fas fa-thumbs-up"></i><span>${movie.release_date}</span>
-        <i class="fas fa-clock"></i><span>${movie.runtime} mins</span>
+        <i class="fas fa-clock"></i><span>${movie.runtime ? movie.runtime + " mins" : "N/A"}</span>
         <i class="fas fa-assistive-listening-systems"></i><span>${movie.language}</span>
         <i class="fas fa-comment"></i><span>${movie.age_rating || "N/A"}</span>
-        <div><strong>Genres:</strong> ${genreList}</div>
+        <div><strong>Genres:</strong> ${movieGenres}</div>
       `;
 
       const addToListButton = document.getElementById("addToListButton");
@@ -314,7 +341,7 @@
     }
 
     // Initialize all genres and movies
-    fetchGenres();
+    fetchMovies();
     initializeRecentlyWatched();
   </script>
 </body>
