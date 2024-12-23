@@ -138,12 +138,22 @@
     .remove-button i {
       color: black;
     }
-
   </style>
 </head>
 <body>
 
-  <!-- Navbar and Movie Row Elements (Your previous code for navbar, etc.) -->
+  <!-- Navbar -->
+  <div class="navbar">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Netflix_logo.svg" alt="Narcotix Logo" />
+    <div class="right-icons">
+      <i class="fas fa-search"></i>
+      <i class="fas fa-bell"></i>
+      <i class="fas fa-user"></i>
+    </div>
+  </div>
+
+  <!-- Movie Row (These will display the movies) -->
+  <div id="movieRowRecentlyWatched" class="row"></div>
 
   <!-- Modal for Movie Information -->
   <div id="movieInfoModal" class="movie-info-modal">
@@ -170,15 +180,23 @@
     </div>
   </div>
 
-  <!-- Movie Row (These will display the movies) -->
-  <div id="movieRowRecentlyWatched" class="row"></div>
-
   <script>
     const apiKey = 'd4d5dc37aeb71914016166a958fbe3db';
     let favoriteMovies = JSON.parse(localStorage.getItem('favoriteMovies')) || [];
     let recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [];
 
-    // Fetch and display the movie row with poster images (same as before)
+    // Fetch and display the movie row with poster images
+    function fetchMovies() {
+      fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=en-US&page=1`)
+        .then(response => response.json())
+        .then(data => {
+          data.results.forEach(movie => {
+            document.getElementById('movieRowRecentlyWatched').appendChild(createMovieBox(movie));
+          });
+        })
+        .catch(error => console.error('Error fetching movies:', error));
+    }
+
     function createMovieBox(movie) {
       const movieBox = document.createElement("div");
       movieBox.classList.add("movie-box");
@@ -200,68 +218,63 @@
 
     // Open the movie information modal
     function openMovieInfoModal(movie) {
-      const modal = document.getElementById("movieInfoModal");
-      document.getElementById("moviePoster").src = "https://image.tmdb.org/t/p/w500" + movie.poster_path;
-      document.getElementById("movieTitle").innerText = movie.title;
-      document.getElementById("movieReleaseDate").innerText = `Release Date: ${movie.release_date}`;
-      document.getElementById("movieDuration").innerText = `Duration: ${movie.runtime} min`;
-      document.getElementById("movieRating").innerText = `Rating: ${movie.vote_average}`;
-      document.getElementById("movieDescription").innerText = movie.overview;
-      document.getElementById("movieCast").innerText = `Cast: ${movie.cast.join(", ")}`;
-      document.getElementById("movieDirector").innerText = `Director: ${movie.director}`;
-      document.getElementById("movieGenres").innerText = `Genres: ${movie.genres.join(", ")}`;
-      
-      const addToFavoritesButton = document.getElementById("addToFavoritesButton");
-      addToFavoritesButton.onclick = function() { addToFavorites(movie); };
+      // Fetch additional movie details
+      fetch(`https://api.themoviedb.org/3/movie/${movie.id}?api_key=${apiKey}&language=en-US`)
+        .then(response => response.json())
+        .then(data => {
+          const modal = document.getElementById("movieInfoModal");
+          document.getElementById("moviePoster").src = "https://image.tmdb.org/t/p/w500" + data.poster_path;
+          document.getElementById("movieTitle").innerText = data.title;
+          document.getElementById("movieReleaseDate").innerText = `Release Date: ${data.release_date}`;
+          document.getElementById("movieDuration").innerText = `Duration: ${data.runtime} min`;
+          document.getElementById("movieRating").innerText = `Rating: ${data.vote_average}`;
+          document.getElementById("movieDescription").innerText = data.overview;
+          document.getElementById("movieCast").innerText = `Cast: ${data.cast.join(", ")}`;
+          document.getElementById("movieDirector").innerText = `Director: ${data.director}`;
+          document.getElementById("movieGenres").innerText = `Genres: ${data.genres.map(genre => genre.name).join(", ")}`;
 
-      modal.style.display = 'block';
+          const addToFavoritesButton = document.getElementById("addToFavoritesButton");
+          addToFavoritesButton.onclick = function() { addToFavorites(movie); };
+
+          modal.style.display = 'block';
+        })
+        .catch(error => console.error('Error fetching movie details:', error));
     }
 
+    // Close the movie information modal
     function closeMovieInfo() {
-      const modal = document.getElementById("movieInfoModal");
-      modal.style.display = 'none';
+      document.getElementById("movieInfoModal").style.display = 'none';
     }
 
-    // Add movie to favorites
+    // Add the movie to the favorites list
     function addToFavorites(movie) {
-      if (!favoriteMovies.some(fav => fav.id === movie.id)) {
+      if (!favoriteMovies.some(favMovie => favMovie.id === movie.id)) {
         favoriteMovies.push(movie);
         localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
+        alert(`${movie.title} has been added to your favorites!`);
       }
     }
 
-    // Play the movie from the last watched position or the start
+    // Play the movie from the last watched position
     function playMovie() {
-      const movieId = document.getElementById("movieTitle").innerText;
-      const lastWatched = localStorage.getItem(`movie-${movieId}-lastWatched`) || 0;
-      openMovieIframe(movieId, lastWatched);
+      // Here you would implement the logic to start playing the movie from the last watched position.
+      alert("Starting the movie...");
     }
 
     // Play the movie from the beginning
     function playFromStart() {
-      const movieId = document.getElementById("movieTitle").innerText;
-      openMovieIframe(movieId, 0);
+      // Here you would implement the logic to start playing the movie from the beginning.
+      alert("Starting the movie from the beginning...");
     }
 
-    // Open movie iframe (This simulates playing a movie)
-    function openMovieIframe(movieId, startTime) {
-      const iframeContainer = document.getElementById("movieIframeContainer");
-      const iframe = document.getElementById("movieIframe");
-      iframe.src = `https://player.smashy.stream/movie/${movieId}?start=${startTime}`;
-      iframeContainer.style.display = 'flex';
-    }
-
-    // Store last watched position
-    function storeLastWatched(movieId, time) {
-      localStorage.setItem(`movie-${movieId}-lastWatched`, time);
-    }
-
-    // Remove movie from Continue Watching
+    // Remove the movie from the Continue Watching list
     function removeFromContinueWatching() {
-      const movieId = document.getElementById("movieTitle").innerText;
-      recentlyWatched = recentlyWatched.filter(movie => movie.id !== movieId);
-      localStorage.setItem('recentlyWatched', JSON.stringify(recentlyWatched));
+      alert("Removing from Continue Watching...");
     }
+
+    // Initialize by fetching movies
+    fetchMovies();
+
   </script>
 </body>
 </html>
