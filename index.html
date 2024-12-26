@@ -1,501 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Narcotix | Pirated Netflix</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-  <style>
-    * {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Player</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+        }
 
-    *::-webkit-scrollbar {
-      display: none;
-    }
+        #media-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
 
-    body {
-      margin: 0;
-      font-family: 'Roboto', sans-serif;
-      background-color: #141414;
-      color: #fff;
-      padding-top: 60px;
-    }
+        #website-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+        }
 
-    .navbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      display: flex;
-      align-items: center;
-      padding: 10px 20px;
-      background-color: #141414;
-      z-index: 1000;
-      border-bottom: 1px solid #ccc;
-    }
-
-    .navbar img {
-      height: 40px;
-    }
-
-    .navbar .right-icons {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-    }
-
-    .navbar .right-icons i {
-      margin: 0 10px;
-      cursor: pointer;
-    }
-
-    #searchBar {
-      position: fixed;
-      top: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: none;
-      background-color: #333;
-      border: none;
-      padding: 10px;
-      color: #fff;
-      font-size: 16px;
-      width: 300px;
-      border-radius: 25px;
-    }
-
-    .top-space {
-      height: 50px;
-    }
-
-    .row {
-      display: flex;
-      overflow-x: auto;
-      padding: 0 20px;
-      margin: 20px 0;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      transition: all 0.3s ease-in-out;
-    }
-
-    .row img {
-      margin-right: 10px;
-      height: 180px;
-      width: 120px;
-      object-fit: cover;
-      cursor: pointer;
-      scroll-snap-align: start;
-      border-radius: 12px;
-      opacity: 0.7;
-      transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-
-    .row img:hover {
-      transform: scale(1.05);
-      opacity: 1;
-    }
-
-    .star-icon, .remove-fav-icon {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      color: #ccc;
-      cursor: pointer;
-      font-size: 25px;
-      transition: color 0.3s ease;
-    }
-
-    .star-icon.filled, .remove-fav-icon {
-      color: #ffcc00;
-    }
-
-    .remove-fav-icon {
-      color: #e50914;
-    }
-
-    .section-title {
-      margin: 20px 20px 10px;
-      font-size: 24px;
-      font-weight: 700;
-    }
-
-    .movie-name {
-      margin-top: 8px;
-      font-size: 16px;
-      font-weight: 700;
-      text-align: center;
-      color: #fff;
-      word-wrap: break-word;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    }
-
-    .movie-year {
-      font-size: 12px;
-      color: #aaa;
-      text-align: center;
-    }
-
-    .favorite-movies, .recently-watched, .search-results {
-      margin-top: 20px;
-    }
-
-    .recently-watched .row img,
-    .favorite-movies .row img {
-      height: 250px;
-      width: 180px;
-    }
-
-    .movie-iframe-container {
-      display: none;
-      position: fixed;
-      top: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 80%;
-      height: 80%;
-      background-color: rgba(0, 0, 0, 0.8);
-      z-index: 999;
-      justify-content: center;
-      align-items: center;
-    }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    .close-iframe {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 30px;
-      color: white;
-      cursor: pointer;
-    }
-
-    .movie-box {
-      position: relative;
-    }
-
-    .movie-description-bubble {
-      position: absolute;
-      top: -40px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: rgba(0, 0, 0, 0.8);
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 5px;
-      max-width: 200px;
-      font-size: 12px;
-      display: none;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: 1000;
-    }
-
-    .movie-box:hover .movie-description-bubble {
-      display: block;
-      opacity: 1;
-    }
-
-    .movie-details-popup {
-      display: none;
-      position: fixed;
-      top: 10%;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #222;
-      color: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      width: 80%;
-      max-width: 600px;
-      z-index: 1001;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
-    }
-
-    .movie-details-popup h2 {
-      margin: 0;
-      font-size: 24px;
-      font-weight: 700;
-    }
-
-    .movie-details-popup p {
-      margin: 10px 0;
-      font-size: 16px;
-    }
-
-    .movie-details-popup .play-button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #e50914;
-      color: #fff;
-      border: none;
-      font-size: 18px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-
-    .movie-details-popup .play-button:hover {
-      background-color: #ffcc00;
-    }
-
-    .close-popup {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 30px;
-      color: white;
-      cursor: pointer;
-    }
-
-  </style>
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
 </head>
-
 <body>
 
-  <div class="top-space"></div>
+<!-- Media (audio + video) -->
+<div id="media-container">
+    <audio id="audio" src="main.mp3" preload="auto" ></audio>
+    <video id="video" src="main.gif" preload="auto" width="640" height="360" autoplay></video>
+</div>
 
-  <div class="navbar">
-    <img alt="Logo" src="https://i.ibb.co/gjBrfcB/c3f62d75a54648c3fcec0d618c004e66.png" width="120" />
-    <div class="right-icons">
-      <i class="fas fa-search" onclick="toggleSearchBox()"></i>
-      <i class="fas fa-tv screen-share-icon" onclick="startScreenSharing()" title="Cast This Page"></i>
-      <i class="fas fa-bell" onclick="showNotifications()"></i>
-      <i class="fas fa-user" onclick="showUserProfile()"></i>
-    </div>
-  </div>
+<!-- Website Embed -->
+<div id="website-container">
+    <iframe src="https://h6a-o0he3bx-7z2-90f9j3a-i0o-2a5u-ksko-fo81h-3.vercel.app" allowfullscreen></iframe>
+</div>
 
-  <input type="text" id="searchBar" placeholder="Search for movies..." oninput="searchMovies()" />
+<script>
+    // Get the audio and video elements
+    const audio = document.getElementById('audio');
+    const video = document.getElementById('video');
+    const mediaContainer = document.getElementById('media-container');
+    const websiteContainer = document.getElementById('website-container');
 
-  <div id="movieIframeContainer" class="movie-iframe-container">
-    <iframe id="movieIframe" src="" allowfullscreen></iframe>
-    <span class="close-iframe" onclick="closeMovieEmbed()">×</span>
-  </div>
+    // Show the media player
+    mediaContainer.style.display = 'flex';
 
-  <div class="favorite-movies">
-    <div class="section-title">Favorite Movies</div>
-    <div class="row" id="movieRowFavorites"></div>
-  </div>
+    // Play the audio and video
+    audio.play();
+    video.play();
 
-  <div class="recently-watched">
-    <div class="section-title">Recently Watched</div>
-    <div class="row" id="movieRowRecentlyWatched"></div>
-  </div>
-
-  <div class="search-results" style="display: none;">
-    <div class="section-title">Search Results</div>
-    <div class="row" id="movieRowSearchResults"></div>
-  </div>
-
-  <div id="genres">
-    <div class="section-title">Action Movies</div>
-    <div class="row" id="movieRowAction"></div>
-    <div class="section-title">Adventure Movies</div>
-    <div class="row" id="movieRowAdventure"></div>
-    <div class="section-title">Comedy Movies</div>
-    <div class="row" id="movieRowComedy"></div>
-  </div>
-
-  <div class="movie-details-popup" id="movieDetailsPopup">
-    <span class="close-popup" onclick="closePopup()">×</span>
-    <h2 id="popupTitle"></h2>
-    <p id="popupDescription"></p>
-    <p><strong>Rating:</strong> <span id="popupRating"></span></p>
-    <p><strong>Release Date:</strong> <span id="popupReleaseDate"></span></p>
-    <button class="play-button" id="playButton">Play</button>
-  </div>
-
-  <script>
-    const apiKey = 'd4d5dc37aeb71914016166a958fbe3db';
-    let favoriteMovies = JSON.parse(localStorage.getItem('favoriteMovies')) || [];
-    let recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [];
-    let searchResults = [];
-    let genres = {
-      action: [28],
-      adventure: [12],
-      comedy: [35],
-    };
-
-    function createMovieBox(movie, isFavorite = false) {
-      const movieBox = document.createElement("div");
-      movieBox.classList.add("movie-box");
-
-      const movieImg = document.createElement("img");
-      movieImg.src = "https://image.tmdb.org/t/p/w185" + movie.poster_path;
-      movieImg.alt = movie.title;
-
-      const movieTitle = document.createElement("div");
-      movieTitle.classList.add("movie-name");
-      movieTitle.innerText = movie.title;
-
-      const movieYear = document.createElement("div");
-      movieYear.classList.add("movie-year");
-      movieYear.innerText = new Date(movie.release_date).getFullYear();
-
-      const movieDescriptionBubble = document.createElement("div");
-      movieDescriptionBubble.classList.add("movie-description-bubble");
-      movieDescriptionBubble.innerText = movie.overview;
-
-      const starIcon = document.createElement("i");
-      starIcon.classList.add("fas", "fa-star", "star-icon");
-      if (favoriteMovies.some(fav => fav.id === movie.id)) {
-        starIcon.classList.add("filled");
-      }
-
-      starIcon.addEventListener("click", function(event) {
-        event.stopPropagation();
-        if (favoriteMovies.some(fav => fav.id === movie.id)) {
-          removeFromFavorites(movie);
-          starIcon.classList.remove("filled");
-        } else {
-          addToFavorites(movie);
-          starIcon.classList.add("filled");
+    // Function to check if both audio and video have finished playing
+    function checkMediaFinished() {
+        if (audio.ended && video.ended) {
+            // Hide the media player and show the website embed
+            mediaContainer.style.display = 'none';
+            websiteContainer.style.display = 'block';
         }
-      });
-
-      movieBox.addEventListener("click", function() {
-        showMovieDetailsPopup(movie);
-      });
-
-      movieBox.appendChild(starIcon);
-      movieBox.appendChild(movieImg);
-      movieBox.appendChild(movieTitle);
-      movieBox.appendChild(movieYear);
-      movieBox.appendChild(movieDescriptionBubble);
-
-      return movieBox;
     }
 
-    function showMovieDetailsPopup(movie) {
-      const popup = document.getElementById("movieDetailsPopup");
-      const title = document.getElementById("popupTitle");
-      const description = document.getElementById("popupDescription");
-      const rating = document.getElementById("popupRating");
-      const releaseDate = document.getElementById("popupReleaseDate");
-      const playButton = document.getElementById("playButton");
-
-      title.innerText = movie.title;
-      description.innerText = movie.overview;
-      rating.innerText = movie.vote_average;
-      releaseDate.innerText = new Date(movie.release_date).toLocaleDateString();
-
-      playButton.onclick = function() {
-        openMovieIframe(movie.id);
-        closePopup();
-      };
-
-      popup.style.display = 'block';
-    }
-
-    function openMovieIframe(movieId) {
-      const iframeContainer = document.getElementById("movieIframeContainer");
-      const iframe = document.getElementById("movieIframe");
-      iframe.src = `https://player.smashy.stream/movie/${movieId}`;
-      iframeContainer.style.display = 'flex';
-    }
-
-    function closeMovieEmbed() {
-      const iframeContainer = document.getElementById("movieIframeContainer");
-      iframeContainer.style.display = 'none';
-    }
-
-    function closePopup() {
-      const popup = document.getElementById("movieDetailsPopup");
-      popup.style.display = 'none';
-    }
-
-    function addToFavorites(movie) {
-      if (!favoriteMovies.some(fav => fav.id === movie.id)) {
-        favoriteMovies.push(movie);
-        localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
-        displayFavoriteMovies();
-      }
-    }
-
-    function removeFromFavorites(movie) {
-      favoriteMovies = favoriteMovies.filter(fav => fav.id !== movie.id);
-      localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
-      displayFavoriteMovies();
-    }
-
-    function displayFavoriteMovies() {
-      const movieRowFavorites = document.getElementById("movieRowFavorites");
-      movieRowFavorites.innerHTML = '';
-      favoriteMovies.forEach(movie => {
-        const movieBox = createMovieBox(movie, true);
-        movieRowFavorites.appendChild(movieBox);
-      });
-    }
-
-    function displayRecentlyWatched() {
-      const movieRowRecentlyWatched = document.getElementById("movieRowRecentlyWatched");
-      movieRowRecentlyWatched.innerHTML = '';
-      recentlyWatched.forEach(movie => {
-        const movieBox = createMovieBox(movie);
-        movieRowRecentlyWatched.appendChild(movieBox);
-      });
-    }
-
-    function displayGenreMovies() {
-      Object.keys(genres).forEach(genre => {
-        fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genres[genre][0]}`)
-          .then(response => response.json())
-          .then(data => {
-            const movieRow = document.getElementById(`movieRow${capitalizeFirstLetter(genre)}`);
-            movieRow.innerHTML = '';
-            data.results.forEach(movie => {
-              const movieBox = createMovieBox(movie);
-              movieRow.appendChild(movieBox);
-            });
-          })
-          .catch(error => console.error(error));
-      });
-    }
-
-    function capitalizeFirstLetter(string) {
-      return string.charAt(0).toUpperCase() + string.slice(1);
-    }
-
-    function toggleSearchBox() {
-      const searchBar = document.getElementById('searchBar');
-      searchBar.style.display = searchBar.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function searchMovies() {
-      const query = document.getElementById("searchBar").value;
-      if (query) {
-        fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${query}`)
-          .then(response => response.json())
-          .then(data => {
-            searchResults = data.results;
-            displaySearchResults();
-          })
-          .catch(error => console.error(error));
-        document.querySelector('.search-results').style.display = 'block';
-      } else {
-        document.querySelector('.search-results').style.display = 'none';
-      }
-    }
-
-    function displaySearchResults() {
-      const movieRowSearchResults = document.getElementById("movieRowSearchResults");
-      movieRowSearchResults.innerHTML = '';
-      searchResults.forEach(movie => {
-        const movieBox = createMovieBox(movie);
-        movieRowSearchResults.appendChild(movieBox);
-      });
-    }
-
-    displayFavoriteMovies();
-    displayRecentlyWatched();
-    displayGenreMovies();
-  </script>
+    // Check the media status every second
+    setInterval(checkMediaFinished, 1000);
+</script>
 
 </body>
 </html>
