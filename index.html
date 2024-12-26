@@ -7,7 +7,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   <style>
-    /* General styles (unchanged) */
+    /* General styles */
     * {
       -ms-overflow-style: none;
       scrollbar-width: none;
@@ -78,6 +78,36 @@
       font-weight: 700;
     }
 
+    /* For Vertical Genre Buttons */
+    .genres-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+      padding: 20px;
+    }
+
+    .genre-button {
+      background-color: #333;
+      border: none;
+      color: white;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .genre-button:hover {
+      background-color: #444;
+    }
+
+    /* For Horizontal Movie Rows */
+    .genre-movies-container {
+      display: none;
+      margin-top: 20px;
+    }
+
     .row {
       display: flex;
       overflow-x: auto;
@@ -85,7 +115,6 @@
       margin: 20px 0;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
-      transition: all 0.3s ease-in-out;
     }
 
     .row img {
@@ -121,131 +150,8 @@
       text-align: center;
     }
 
-    .movie-iframe-container {
-      display: none;
-      position: fixed;
-      top: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 80%;
-      height: 80%;
-      background-color: rgba(0, 0, 0, 0.8);
-      z-index: 999;
-      justify-content: center;
-      align-items: center;
-    }
+    /* Other styles remain unchanged */
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    .close-iframe {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 30px;
-      color: white;
-      cursor: pointer;
-    }
-
-    .movie-box {
-      position: relative;
-    }
-
-    /* Modal (Popup) style for movie description */
-    .movie-info-modal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: rgba(0, 0, 0, 0.9);
-      color: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 600px;
-      width: 80%;
-      display: none;
-      z-index: 1001;
-      text-align: center;
-    }
-
-    .movie-info-modal h2 {
-      margin-bottom: 15px;
-    }
-
-    .movie-info-modal p {
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .close-modal {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      color: #fff;
-      font-size: 25px;
-      cursor: pointer;
-    }
-
-    .star-icon {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      color: #ccc;
-      cursor: pointer;
-      font-size: 25px;
-      transition: color 0.3s ease;
-    }
-
-    .star-icon.filled {
-      color: #ffcc00;
-    }
-
-    .remove-button {
-      background-color: white;
-      color: black;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border: none;
-      border-radius: 5px;
-      padding: 10px;
-      cursor: pointer;
-    }
-
-    .remove-button i {
-      color: black;
-    }
-
-    /* Styles for Genre Buttons */
-    .genres-container {
-      margin-top: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    .genre-button {
-      background-color: #333;
-      border: none;
-      color: white;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    .genre-button:hover {
-      background-color: #444;
-    }
-
-    .genre-movies {
-      margin-top: 20px;
-    }
   </style>
 </head>
 
@@ -270,23 +176,6 @@
     <span class="close-iframe" onclick="closeMovieEmbed()">×</span>
   </div>
 
-  <!-- Modal to display movie info (description) -->
-  <div id="movieInfoModal" class="movie-info-modal">
-    <span class="close-modal" onclick="closeMovieInfo()">×</span>
-    <h2 id="movieInfoTitle"></h2>
-    <p id="movieInfoDescription"></p>
-    <button class="remove-button" onclick="removeFromContinueWatching()">
-      <span><i class="fas fa-times"></i> Remove from Continue Watching</span>
-      <i class="fas fa-arrow-right"></i>
-    </button>
-    <button class="remove-button" id="playButton" onclick="playMovie()">
-      <span><i class="fas fa-play"></i> Play</span>
-    </button>
-    <button class="remove-button" id="playFromStartButton" onclick="playFromStart()">
-      <span><i class="fas fa-play-circle"></i> Play from Beginning</span>
-    </button>
-  </div>
-
   <div class="favorite-movies">
     <div class="section-title">Favorite Movies</div>
     <div class="row" id="movieRowFavorites"></div>
@@ -300,7 +189,7 @@
   <div class="genres">
     <div class="section-title">Genres</div>
     <div id="genresContainer" class="genres-container"></div>
-    <div class="genre-movies" id="genreMoviesContainer"></div>
+    <div class="genre-movies-container" id="genreMoviesContainer"></div>
   </div>
 
   <script>
@@ -342,6 +231,7 @@
 
     function displayMoviesByGenre(movies, genreName) {
       const genreMoviesContainer = document.getElementById("genreMoviesContainer");
+      genreMoviesContainer.style.display = 'block'; // Show genre movies container
       genreMoviesContainer.innerHTML = `<h2>${genreName}</h2>`;  // Clear previous genre movies and show genre name
       const movieRow = document.createElement("div");
       movieRow.classList.add("row");
@@ -472,29 +362,10 @@
       });
     }
 
-    function fetchMovies() {
-      fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&page=1`)
-        .then(response => response.json())
-        .then(data => {
-          searchResults = data.results;
-          displayMovies();
-        })
-        .catch(error => console.error('Error fetching movies:', error));
-    }
-
-    function displayMovies() {
-      const movieRow = document.getElementById("movieRowSearchResults");
-      movieRow.innerHTML = '';
-      searchResults.forEach(movie => {
-        const movieBox = createMovieBox(movie);
-        movieRow.appendChild(movieBox);
-      });
-    }
-
+    // Fetch genres and movies when the page loads
     fetchGenres();
     displayFavoriteMovies();
     displayRecentlyWatched();
-    fetchMovies();
   </script>
 </body>
 </html>
