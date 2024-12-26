@@ -17,9 +17,10 @@
         }
 
         #media-container {
-            display: none;
-            flex-direction: column;
+            display: flex;
+            justify-content: center;
             align-items: center;
+            position: absolute;
         }
 
         #website-container {
@@ -40,10 +41,10 @@
 </head>
 <body>
 
-<!-- Media (audio + video) -->
+<!-- Media (audio + gif) -->
 <div id="media-container">
-    <audio id="audio" src="main.mp3" preload="auto" ></audio>
-    <video id="video" src="main.gif" preload="auto" width="640" height="360" autoplay></video>
+    <audio id="audio" src="main.mp3" preload="auto"></audio>
+    <img id="gif" src="main.gif" alt="Gif" style="width: 640px; height: 360px;" />
 </div>
 
 <!-- Website Embed -->
@@ -52,30 +53,29 @@
 </div>
 
 <script>
-    // Get the audio and video elements
+    // Get elements
     const audio = document.getElementById('audio');
-    const video = document.getElementById('video');
+    const gif = document.getElementById('gif');
     const mediaContainer = document.getElementById('media-container');
     const websiteContainer = document.getElementById('website-container');
 
-    // Show the media player
+    // Show the media container (audio and GIF)
     mediaContainer.style.display = 'flex';
 
-    // Play the audio and video
+    // Play audio on page load
     audio.play();
-    video.play();
 
-    // Function to check if both audio and video have finished playing
-    function checkMediaFinished() {
-        if (audio.ended && video.ended) {
+    // Function to check if audio has finished playing
+    function checkAudioFinished() {
+        if (audio.ended) {
             // Hide the media player and show the website embed
             mediaContainer.style.display = 'none';
             websiteContainer.style.display = 'block';
         }
     }
 
-    // Check the media status every second
-    setInterval(checkMediaFinished, 1000);
+    // Check the audio status every second
+    setInterval(checkAudioFinished, 1000);
 </script>
 
 </body>
