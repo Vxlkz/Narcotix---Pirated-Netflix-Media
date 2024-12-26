@@ -12,7 +12,7 @@
       color: white;
       background-color: black;
     }
-    
+
     .top-space {
       height: 50px;
     }
@@ -156,21 +156,6 @@
     .remove-button i {
       color: black;
     }
-
-    /* Movie Row & Genre Styles */
-    .genre-button {
-      background-color: #111;
-      color: white;
-      padding: 10px;
-      margin: 5px;
-      border: none;
-      cursor: pointer;
-    }
-
-    .genre-button:hover {
-      background-color: #555;
-    }
-
   </style>
 </head>
 <body>
@@ -303,7 +288,7 @@
       localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
     }
 
-    // Initialize Recently Watched Section
+    // Initialize recently watched section
     function initializeRecentlyWatched() {
       const movieRow = document.getElementById("movieRowRecentlyWatched");
 
@@ -317,5 +302,6 @@
     fetchGenres();
     initializeRecentlyWatched();
   </script>
+
 </body>
 </html>
