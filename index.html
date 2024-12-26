@@ -202,6 +202,49 @@
       display: block;
       opacity: 1;
     }
+
+    .movie-details-popup {
+      display: none;
+      position: fixed;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #222;
+      color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      width: 80%;
+      max-width: 600px;
+      z-index: 1001;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+    }
+
+    .movie-details-popup h2 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .movie-details-popup p {
+      margin: 10px 0;
+      font-size: 16px;
+    }
+
+    .movie-details-popup .play-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #e50914;
+      color: #fff;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .movie-details-popup .play-button:hover {
+      background-color: #ffcc00;
+    }
+
   </style>
 </head>
 
@@ -248,28 +291,14 @@
     <div class="row" id="movieRowAdventure"></div>
     <div class="section-title">Comedy Movies</div>
     <div class="row" id="movieRowComedy"></div>
-    <div class="section-title">Horror Movies</div>
-    <div class="row" id="movieRowHorror"></div>
-    <div class="section-title">Drama Movies</div>
-    <div class="row" id="movieRowDrama"></div>
-    <div class="section-title">Romance Movies</div>
-    <div class="row" id="movieRowRomance"></div>
-    <div class="section-title">Thriller Movies</div>
-    <div class="row" id="movieRowThriller"></div>
-    <div class="section-title">Sci-Fi Movies</div>
-    <div class="row" id="movieRowSciFi"></div>
-    <div class="section-title">Family Movies</div>
-    <div class="row" id="movieRowFamily"></div>
-    <div class="section-title">Animation Movies</div>
-    <div class="row" id="movieRowAnimation"></div>
-    <div class="section-title">Documentary Movies</div>
-    <div class="row" id="movieRowDocumentary"></div>
-    <div class="section-title">Music Movies</div>
-    <div class="row" id="movieRowMusic"></div>
-    <div class="section-title">War Movies</div>
-    <div class="row" id="movieRowWar"></div>
-    <div class="section-title">History Movies</div>
-    <div class="row" id="movieRowHistory"></div>
+  </div>
+
+  <div class="movie-details-popup" id="movieDetailsPopup">
+    <h2 id="popupTitle"></h2>
+    <p id="popupDescription"></p>
+    <p><strong>Rating:</strong> <span id="popupRating"></span></p>
+    <p><strong>Release Date:</strong> <span id="popupReleaseDate"></span></p>
+    <button class="play-button" id="playButton">Play</button>
   </div>
 
   <script>
@@ -316,8 +345,7 @@
       });
 
       movieBox.addEventListener("click", function() {
-        addToRecentlyWatched(movie);
-        openMovieIframe(movie.id);
+        showMovieDetailsPopup(movie);
       });
 
       movieBox.appendChild(starIcon); 
@@ -329,56 +357,24 @@
       return movieBox;
     }
 
-    function addToFavorites(movie) {
-      if (!favoriteMovies.some(fav => fav.id === movie.id)) {
-        favoriteMovies.push(movie);
-        localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
-        displayFavoriteMovies();
-      }
-    }
+    function showMovieDetailsPopup(movie) {
+      const popup = document.getElementById("movieDetailsPopup");
+      const title = document.getElementById("popupTitle");
+      const description = document.getElementById("popupDescription");
+      const rating = document.getElementById("popupRating");
+      const releaseDate = document.getElementById("popupReleaseDate");
+      const playButton = document.getElementById("playButton");
 
-    function removeFromFavorites(movie) {
-      favoriteMovies = favoriteMovies.filter(fav => fav.id !== movie.id);
-      localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
-      displayFavoriteMovies();
-    }
+      title.innerText = movie.title;
+      description.innerText = movie.overview;
+      rating.innerText = movie.vote_average;
+      releaseDate.innerText = new Date(movie.release_date).toLocaleDateString();
 
-    function addToRecentlyWatched(movie) {
-      if (!recentlyWatched.some(watched => watched.id === movie.id)) {
-        recentlyWatched.unshift(movie); 
-        if (recentlyWatched.length > 10) {
-          recentlyWatched.pop(); 
-        }
-        localStorage.setItem('recentlyWatched', JSON.stringify(recentlyWatched));
-        displayRecentlyWatched();
-      }
-    }
+      playButton.onclick = function() {
+        openMovieIframe(movie.id);
+      };
 
-    function displayFavoriteMovies() {
-      const movieRowFavorites = document.getElementById("movieRowFavorites");
-      movieRowFavorites.innerHTML = '';
-      favoriteMovies.forEach(movie => {
-        const movieBox = createMovieBox(movie, true);
-        movieRowFavorites.appendChild(movieBox);
-      });
-    }
-
-    function displayRecentlyWatched() {
-      const movieRowRecentlyWatched = document.getElementById("movieRowRecentlyWatched");
-      movieRowRecentlyWatched.innerHTML = '';
-      recentlyWatched.forEach(movie => {
-        const movieBox = createMovieBox(movie);
-        movieRowRecentlyWatched.appendChild(movieBox);
-      });
-    }
-
-    function displaySearchResults() {
-      const movieRowSearchResults = document.getElementById("movieRowSearchResults");
-      movieRowSearchResults.innerHTML = '';
-      searchResults.forEach(movie => {
-        const movieBox = createMovieBox(movie);
-        movieRowSearchResults.appendChild(movieBox);
-      });
+      popup.style.display = 'block';
     }
 
     function openMovieIframe(movieId) {
@@ -412,6 +408,47 @@
       } else {
         document.querySelector('.search-results').style.display = 'none';
       }
+    }
+
+    function displaySearchResults() {
+      const movieRowSearchResults = document.getElementById("movieRowSearchResults");
+      movieRowSearchResults.innerHTML = '';
+      searchResults.forEach(movie => {
+        const movieBox = createMovieBox(movie);
+        movieRowSearchResults.appendChild(movieBox);
+      });
+    }
+
+    function addToFavorites(movie) {
+      if (!favoriteMovies.some(fav => fav.id === movie.id)) {
+        favoriteMovies.push(movie);
+        localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
+        displayFavoriteMovies();
+      }
+    }
+
+    function removeFromFavorites(movie) {
+      favoriteMovies = favoriteMovies.filter(fav => fav.id !== movie.id);
+      localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
+      displayFavoriteMovies();
+    }
+
+    function displayFavoriteMovies() {
+      const movieRowFavorites = document.getElementById("movieRowFavorites");
+      movieRowFavorites.innerHTML = '';
+      favoriteMovies.forEach(movie => {
+        const movieBox = createMovieBox(movie, true);
+        movieRowFavorites.appendChild(movieBox);
+      });
+    }
+
+    function displayRecentlyWatched() {
+      const movieRowRecentlyWatched = document.getElementById("movieRowRecentlyWatched");
+      movieRowRecentlyWatched.innerHTML = '';
+      recentlyWatched.forEach(movie => {
+        const movieBox = createMovieBox(movie);
+        movieRowRecentlyWatched.appendChild(movieBox);
+      });
     }
 
     displayFavoriteMovies();
