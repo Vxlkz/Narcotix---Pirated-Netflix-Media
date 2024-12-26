@@ -245,6 +245,15 @@
       background-color: #ffcc00;
     }
 
+    .close-popup {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 30px;
+      color: white;
+      cursor: pointer;
+    }
+
   </style>
 </head>
 
@@ -294,6 +303,7 @@
   </div>
 
   <div class="movie-details-popup" id="movieDetailsPopup">
+    <span class="close-popup" onclick="closePopup()">×</span>
     <h2 id="popupTitle"></h2>
     <p id="popupDescription"></p>
     <p><strong>Rating:</strong> <span id="popupRating"></span></p>
@@ -306,6 +316,11 @@
     let favoriteMovies = JSON.parse(localStorage.getItem('favoriteMovies')) || [];
     let recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [];
     let searchResults = [];
+    let genres = {
+      action: [28],
+      adventure: [12],
+      comedy: [35],
+    };
 
     function createMovieBox(movie, isFavorite = false) {
       const movieBox = document.createElement("div");
@@ -334,7 +349,7 @@
       }
 
       starIcon.addEventListener("click", function(event) {
-        event.stopPropagation(); 
+        event.stopPropagation();
         if (favoriteMovies.some(fav => fav.id === movie.id)) {
           removeFromFavorites(movie);
           starIcon.classList.remove("filled");
@@ -348,7 +363,7 @@
         showMovieDetailsPopup(movie);
       });
 
-      movieBox.appendChild(starIcon); 
+      movieBox.appendChild(starIcon);
       movieBox.appendChild(movieImg);
       movieBox.appendChild(movieTitle);
       movieBox.appendChild(movieYear);
@@ -372,6 +387,7 @@
 
       playButton.onclick = function() {
         openMovieIframe(movie.id);
+        closePopup();
       };
 
       popup.style.display = 'block';
@@ -389,34 +405,9 @@
       iframeContainer.style.display = 'none';
     }
 
-    function toggleSearchBox() {
-      const searchBar = document.getElementById('searchBar');
-      searchBar.style.display = searchBar.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function searchMovies() {
-      const query = document.getElementById("searchBar").value;
-      if (query) {
-        fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${query}`)
-          .then(response => response.json())
-          .then(data => {
-            searchResults = data.results;
-            displaySearchResults();
-          })
-          .catch(error => console.error(error));
-        document.querySelector('.search-results').style.display = 'block';
-      } else {
-        document.querySelector('.search-results').style.display = 'none';
-      }
-    }
-
-    function displaySearchResults() {
-      const movieRowSearchResults = document.getElementById("movieRowSearchResults");
-      movieRowSearchResults.innerHTML = '';
-      searchResults.forEach(movie => {
-        const movieBox = createMovieBox(movie);
-        movieRowSearchResults.appendChild(movieBox);
-      });
+    function closePopup() {
+      const popup = document.getElementById("movieDetailsPopup");
+      popup.style.display = 'none';
     }
 
     function addToFavorites(movie) {
@@ -451,8 +442,59 @@
       });
     }
 
+    function displayGenreMovies() {
+      Object.keys(genres).forEach(genre => {
+        fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genres[genre][0]}`)
+          .then(response => response.json())
+          .then(data => {
+            const movieRow = document.getElementById(`movieRow${capitalizeFirstLetter(genre)}`);
+            movieRow.innerHTML = '';
+            data.results.forEach(movie => {
+              const movieBox = createMovieBox(movie);
+              movieRow.appendChild(movieBox);
+            });
+          })
+          .catch(error => console.error(error));
+      });
+    }
+
+    function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function toggleSearchBox() {
+      const searchBar = document.getElementById('searchBar');
+      searchBar.style.display = searchBar.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function searchMovies() {
+      const query = document.getElementById("searchBar").value;
+      if (query) {
+        fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${query}`)
+          .then(response => response.json())
+          .then(data => {
+            searchResults = data.results;
+            displaySearchResults();
+          })
+          .catch(error => console.error(error));
+        document.querySelector('.search-results').style.display = 'block';
+      } else {
+        document.querySelector('.search-results').style.display = 'none';
+      }
+    }
+
+    function displaySearchResults() {
+      const movieRowSearchResults = document.getElementById("movieRowSearchResults");
+      movieRowSearchResults.innerHTML = '';
+      searchResults.forEach(movie => {
+        const movieBox = createMovieBox(movie);
+        movieRowSearchResults.appendChild(movieBox);
+      });
+    }
+
     displayFavoriteMovies();
     displayRecentlyWatched();
+    displayGenreMovies();
   </script>
 
 </body>
