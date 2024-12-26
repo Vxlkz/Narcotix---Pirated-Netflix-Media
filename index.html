@@ -242,6 +242,10 @@
     .genre-button:hover {
       background-color: #444;
     }
+
+    .genre-movies {
+      margin-top: 20px;
+    }
   </style>
 </head>
 
@@ -293,61 +297,61 @@
     <div class="row" id="movieRowRecentlyWatched"></div>
   </div>
 
-  <div class="search-results" style="display: none;">
-    <div class="section-title">Search Results</div>
-    <div class="row" id="movieRowSearchResults"></div>
+  <div class="genres">
+    <div class="section-title">Genres</div>
+    <div id="genresContainer" class="genres-container"></div>
+    <div class="genre-movies" id="genreMoviesContainer"></div>
   </div>
-
-  <div id="genresContainer" class="genres-container"></div>
 
   <script>
     const apiKey = 'd4d5dc37aeb71914016166a958fbe3db';
     let favoriteMovies = JSON.parse(localStorage.getItem('favoriteMovies')) || [];
     let recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [];
     let searchResults = [];
-    let genres = [];  // Store genres here
+    let genres = [];
 
-    // Fetch genres from TMDb API
     function fetchGenres() {
       fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${apiKey}`)
         .then(response => response.json())
         .then(data => {
           genres = data.genres;
-          displayGenres();  // Display genres once fetched
+          displayGenres();
         })
         .catch(error => console.error('Error fetching genres:', error));
     }
 
-    // Display genres in the navbar or any section you want
     function displayGenres() {
       const genresContainer = document.getElementById("genresContainer");
       genres.forEach(genre => {
         const genreButton = document.createElement('button');
         genreButton.classList.add('genre-button');
         genreButton.innerText = genre.name;
-        genreButton.onclick = () => fetchMoviesByGenre(genre.id);  // Fetch movies by genre on click
+        genreButton.onclick = () => fetchMoviesByGenre(genre.id, genre.name);
         genresContainer.appendChild(genreButton);
       });
     }
 
-    // Fetch movies by genre
-    function fetchMoviesByGenre(genreId) {
+    function fetchMoviesByGenre(genreId, genreName) {
       fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}`)
         .then(response => response.json())
         .then(data => {
-          displayMoviesByGenre(data.results);  // Display movies filtered by genre
+          displayMoviesByGenre(data.results, genreName);
         })
         .catch(error => console.error('Error fetching movies by genre:', error));
     }
 
-    // Display movies by genre
-    function displayMoviesByGenre(movies) {
-      const movieRow = document.getElementById("movieRowSearchResults");
-      movieRow.innerHTML = '';  // Clear previous search results
+    function displayMoviesByGenre(movies, genreName) {
+      const genreMoviesContainer = document.getElementById("genreMoviesContainer");
+      genreMoviesContainer.innerHTML = `<h2>${genreName}</h2>`;  // Clear previous genre movies and show genre name
+      const movieRow = document.createElement("div");
+      movieRow.classList.add("row");
+
       movies.forEach(movie => {
         const movieBox = createMovieBox(movie);
         movieRow.appendChild(movieBox);
       });
+
+      genreMoviesContainer.appendChild(movieRow);
     }
 
     function createMovieBox(movie) {
@@ -373,7 +377,7 @@
       }
 
       starIcon.addEventListener("click", function(event) {
-        event.stopPropagation(); 
+        event.stopPropagation();
         if (favoriteMovies.some(fav => fav.id === movie.id)) {
           removeFromFavorites(movie);
           starIcon.classList.remove("filled");
@@ -452,7 +456,7 @@
 
     function displayFavoriteMovies() {
       const movieRowFavorites = document.getElementById("movieRowFavorites");
-      movieRowFavorites.innerHTML = '';  // Clear previous favorite movies
+      movieRowFavorites.innerHTML = '';
       favoriteMovies.forEach(movie => {
         const movieBox = createMovieBox(movie);
         movieRowFavorites.appendChild(movieBox);
@@ -461,7 +465,7 @@
 
     function displayRecentlyWatched() {
       const movieRowRecentlyWatched = document.getElementById("movieRowRecentlyWatched");
-      movieRowRecentlyWatched.innerHTML = '';  // Clear previous recently watched
+      movieRowRecentlyWatched.innerHTML = '';
       recentlyWatched.forEach(movie => {
         const movieBox = createMovieBox(movie);
         movieRowRecentlyWatched.appendChild(movieBox);
@@ -473,26 +477,24 @@
         .then(response => response.json())
         .then(data => {
           searchResults = data.results;
-          displayMovies(); 
+          displayMovies();
         })
         .catch(error => console.error('Error fetching movies:', error));
     }
 
     function displayMovies() {
       const movieRow = document.getElementById("movieRowSearchResults");
-      movieRow.innerHTML = '';  // Clear previous movies
+      movieRow.innerHTML = '';
       searchResults.forEach(movie => {
         const movieBox = createMovieBox(movie);
         movieRow.appendChild(movieBox);
       });
     }
 
-    // Initialize everything
-    fetchGenres();  // Fetch genres when the page loads
+    fetchGenres();
     displayFavoriteMovies();
     displayRecentlyWatched();
     fetchMovies();
   </script>
-
 </body>
 </html>
