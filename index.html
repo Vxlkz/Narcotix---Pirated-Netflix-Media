@@ -21,6 +21,8 @@
             justify-content: center;
             align-items: center;
             position: absolute;
+            width: 100%;
+            height: 100%;
         }
 
         #website-container {
@@ -37,14 +39,21 @@
             height: 100%;
             border: none;
         }
+
+        /* Ensure the video or gif fills the screen */
+        video, img {
+            object-fit: cover;  /* Ensures the content covers the screen, keeping aspect ratio */
+            width: 100%;         /* Stretch to full width */
+            height: 100%;        /* Stretch to full height */
+        }
     </style>
 </head>
 <body>
 
-<!-- Media (audio + gif) -->
+<!-- Media (video + audio) -->
 <div id="media-container">
     <audio id="audio" src="main.mp3" preload="auto"></audio>
-    <img id="gif" src="main.gif" alt="Gif" style="width: 640px; height: 360px;" />
+    <video id="video" src="main.mp4" preload="auto" autoplay></video>
 </div>
 
 <!-- Website Embed -->
@@ -55,27 +64,25 @@
 <script>
     // Get elements
     const audio = document.getElementById('audio');
-    const gif = document.getElementById('gif');
+    const video = document.getElementById('video');
     const mediaContainer = document.getElementById('media-container');
     const websiteContainer = document.getElementById('website-container');
 
-    // Show the media container (audio and GIF)
-    mediaContainer.style.display = 'flex';
-
-    // Play audio on page load
+    // Play audio and video when the page loads
     audio.play();
+    video.play();
 
-    // Function to check if audio has finished playing
-    function checkAudioFinished() {
-        if (audio.ended) {
+    // Function to check if the audio and video have finished playing
+    function checkMediaFinished() {
+        if (audio.ended && video.ended) {
             // Hide the media player and show the website embed
             mediaContainer.style.display = 'none';
             websiteContainer.style.display = 'block';
         }
     }
 
-    // Check the audio status every second
-    setInterval(checkAudioFinished, 1000);
+    // Check the media status every second
+    setInterval(checkMediaFinished, 1000);
 </script>
 
 </body>
