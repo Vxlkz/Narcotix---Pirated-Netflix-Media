@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Narcotix | Pirated Netflix</title>
+    <title>Video Play and Embed</title>
     <style>
         /* Make the video and embed container take up the full screen */
         #video-container, #embed-container {
@@ -61,6 +61,11 @@
         const videoPlayer = document.getElementById('video-player');
         const videoContainer = document.getElementById('video-container');
         const embedContainer = document.getElementById('embed-container');
+
+        // Ensure the video plays automatically when the page loads
+        window.onload = function() {
+            videoPlayer.play();
+        };
 
         // Listen for when the video ends
         videoPlayer.addEventListener('ended', function() {
