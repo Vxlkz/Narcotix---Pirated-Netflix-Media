@@ -5,25 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video and Website Embed</title>
     <style>
-        /* Make sure the body takes full height */
+        /* Make sure the body and html take full height */
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
             background-color: black;  /* Set background to black */
+            overflow: hidden;  /* Prevent scrolling during intro */
         }
 
-        /* Video should fill the entire screen */
-        #videoPlayer {
+        /* The GIF will fill the entire screen */
+        #gifPlayer {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Ensure the video resizes to fill the screen */
+            object-fit: cover;  /* Ensures the GIF covers the screen */
         }
 
-        /* Embed container is initially hidden and will take full screen once video ends */
+        /* The Audio player is hidden, but it plays in the background */
+        #audioPlayer {
+            display: none;
+        }
+
+        /* Embed container is initially hidden and will take full screen once the intro ends */
         #websiteEmbed {
             display: none;
             width: 100%;
@@ -40,30 +46,44 @@
 </head>
 <body>
 
-    <!-- Video player -->
-    <video id="videoPlayer" controls autoplay>
-        <!-- External link to the video hosted on GitHub -->
-        <source src="https://github.com/Vxlkz/pirated-netflix-free/raw/refs/heads/main/video.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
+    <!-- GIF player -->
+    <img id="gifPlayer" src="main.gif" alt="Intro GIF">
+
+    <!-- Audio player (hidden, but plays the MP3) -->
+    <audio id="audioPlayer" autoplay>
+        <source src="main.mp3" type="audio/mp3">
+        Your browser does not support the audio tag.
+    </audio>
 
     <!-- Website Embed (Initially hidden) -->
     <div id="websiteEmbed">
-        <iframe src="https://narcotix.netlify.app"></iframe>
+        <iframe src="https://youtube.app"></iframe>
     </div>
 
     <script>
-        // Get video player and embed container
-        const videoPlayer = document.getElementById('videoPlayer');
+        // Get the audio player, gif player, and embed container
+        const gifPlayer = document.getElementById('gifPlayer');
+        const audioPlayer = document.getElementById('audioPlayer');
         const websiteEmbed = document.getElementById('websiteEmbed');
 
-        // When the video ends, show the website embed
-        videoPlayer.onended = function() {
-            // Hide the video
-            videoPlayer.style.display = 'none';
+        // Create a new audio element to track the duration of the audio
+        const audio = new Audio('main.mp3');
+        audio.oncanplaythrough = function() {
+            // Get the duration of the audio
+            const audioDuration = audio.duration;
 
-            // Show the website embed
-            websiteEmbed.style.display = 'block';
+            // The GIF and MP3 should play at the same time, and both should end before showing the embed
+            setTimeout(function() {
+                // Once both the GIF and MP3 finish, hide the GIF and show the embed
+                gifPlayer.style.display = 'none';
+                websiteEmbed.style.display = 'block';
+            }, audioDuration * 1000);  // Multiply by 1000 to convert seconds to milliseconds
+        };
+
+        // Start both the audio and GIF at the same time when the page loads
+        window.onload = function() {
+            audioPlayer.play();  // Play the audio
+            // No need to control GIF, it plays automatically as soon as it loads
         };
     </script>
 
