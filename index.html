@@ -3,87 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Media Player</title>
+    <title>Narcotix - Pirated Netflix</title>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #000;
-        }
-
-        #media-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
-
-        #website-container {
-            width: 100%;
-            height: 100%;
+        /* Make the video and embed container take up the full screen */
+        #video-container, #embed-container {
             position: absolute;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #video-container {
+            background: black; /* Hide video controls and prevent interaction */
+        }
+
+        /* Hide embed container initially */
+        #embed-container {
             display: none;
         }
 
+        /* Make the iframe fill the entire screen */
         iframe {
             width: 100%;
             height: 100%;
             border: none;
         }
 
-        /* Ensure the video or gif fills the screen */
-        video, img {
-            object-fit: cover;  /* Ensures the content covers the screen, keeping aspect ratio */
-            width: 100%;         /* Stretch to full width */
-            height: 100%;        /* Stretch to full height */
+        /* Make the video fill the entire screen and hide controls */
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;  /* Ensure video scales correctly */
+            pointer-events: none;  /* Disable all interactions with the video */
         }
     </style>
 </head>
 <body>
 
-<!-- Media (video + audio) -->
-<div id="media-container">
-    <audio id="audio" src="main.mp3" preload="auto"></audio>
-    <video id="video" src="video.mp4" preload="auto" autoplay></video>
-</div>
+    <!-- Video container -->
+    <div id="video-container">
+        <video id="video-player" autoplay muted>
+            <source src="video.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
 
-<!-- Website Embed -->
-<div id="website-container">
-    <iframe src="https://h6a-o0he3bx-7z2-90f9j3a-i0o-2a5u-ksko-fo81h-3.vercel.app" allowfullscreen></iframe>
-</div>
+    <!-- Embed container -->
+    <div id="embed-container">
+        <iframe src="https://narcotix.netlify.app" allowfullscreen></iframe>
+    </div>
 
-<script>
-    // Get elements
-    const audio = document.getElementById('audio');
-    const video = document.getElementById('video');
-    const mediaContainer = document.getElementById('media-container');
-    const websiteContainer = document.getElementById('website-container');
+    <script>
+        const videoPlayer = document.getElementById('video-player');
+        const videoContainer = document.getElementById('video-container');
+        const embedContainer = document.getElementById('embed-container');
 
-    // Play audio and video when the page loads
-    audio.play();
-    video.play();
-
-    // Function to check if the audio and video have finished playing
-    function checkMediaFinished() {
-        if (audio.ended && video.ended) {
-            // Hide the media player and show the website embed
-            mediaContainer.style.display = 'none';
-            websiteContainer.style.display = 'block';
-        }
-    }
-
-    // Check the media status every second
-    setInterval(checkMediaFinished, 1000);
-</script>
+        // Listen for when the video ends
+        videoPlayer.addEventListener('ended', function() {
+            // Hide the video and show the embed
+            videoContainer.style.display = 'none';
+            embedContainer.style.display = 'flex';
+        });
+    </script>
 
 </body>
 </html>
