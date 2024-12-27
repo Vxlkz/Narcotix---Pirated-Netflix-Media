@@ -3,76 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Play and Embed</title>
-    <style>
-        /* Make the video and embed container take up the full screen */
-        #video-container, #embed-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #video-container {
-            background: black; /* Hide video controls and prevent interaction */
-        }
-
-        /* Hide embed container initially */
-        #embed-container {
-            display: none;
-        }
-
-        /* Make the iframe fill the entire screen */
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        /* Make the video fill the entire screen and hide controls */
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;  /* Ensure video scales correctly */
-            pointer-events: none;  /* Disable all interactions with the video */
-        }
-    </style>
+    <title>Video and Website Embed</title>
 </head>
 <body>
 
-    <!-- Video container -->
-    <div id="video-container">
-        <video id="video-player" autoplay muted>
-            <source src="video.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-    </div>
+    <!-- Video player -->
+    <video id="videoPlayer" width="100%" height="auto" controls autoplay>
+        <!-- External link to the video hosted on GitHub -->
+        <source src="https://github.com/Vxlkz/pirated-netflix-free/raw/refs/heads/main/video.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
 
-    <!-- Embed container -->
-    <div id="embed-container">
-        <iframe src="https://narcotix.netlify.app" allowfullscreen></iframe>
+    <!-- Website Embed (Initially hidden) -->
+    <div id="websiteEmbed" style="display: none; width: 100%; height: 100vh;">
+        <iframe src="https://narcotix.netlify.app" width="100%" height="100%" style="border: none;"></iframe>
     </div>
 
     <script>
-        const videoPlayer = document.getElementById('video-player');
-        const videoContainer = document.getElementById('video-container');
-        const embedContainer = document.getElementById('embed-container');
+        // Get video player and embed container
+        const videoPlayer = document.getElementById('videoPlayer');
+        const websiteEmbed = document.getElementById('websiteEmbed');
 
-        // Ensure the video plays automatically when the page loads
-        window.onload = function() {
-            videoPlayer.play();
+        // When the video ends, show the website embed
+        videoPlayer.onended = function() {
+            // Hide the video
+            videoPlayer.style.display = 'none';
+
+            // Show the website embed
+            websiteEmbed.style.display = 'block';
         };
-
-        // Listen for when the video ends
-        videoPlayer.addEventListener('ended', function() {
-            // Hide the video and show the embed
-            videoContainer.style.display = 'none';
-            embedContainer.style.display = 'flex';
-        });
     </script>
 
 </body>
